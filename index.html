@@ -99,11 +99,6 @@
         <div id="foods-grid" class="foods-grid">
           <!-- Dynamically populated -->
         </div>
-
-        <!-- FLOATING ADD BUTTON -->
-        <button id="btn-open-add-modal" class="fab-button" aria-label="アイテム追加">
-          <i data-lucide="plus"></i>
-        </button>
       </section>
 
       <!-- TAB 2: SEASONINGS -->
@@ -120,6 +115,13 @@
             </select>
           </div>
         </div>
+        <form id="add-seasoning-form" class="add-seasoning-form">
+          <input type="text" id="seasoning-name-input" placeholder="調味料名を入力..." autocomplete="off" required>
+          <input type="color" id="seasoning-color-input" value="#a8a29e" title="カラー選択">
+          <button type="submit" class="btn-primary btn-square-add" aria-label="追加">
+            <i data-lucide="plus"></i>
+          </button>
+        </form>
         <div id="seasonings-grid" class="seasonings-grid">
           <!-- Dynamically populated -->
         </div>
@@ -129,7 +131,7 @@
       <section id="section-shopping" class="tab-section">
         <div class="shopping-header">
           <h2>買い物リスト</h2>
-          <p>必要な食材や切れた調味料を管理します</p>
+          <p>必要な食材・日用品を管理します</p>
         </div>
         
         <!-- Smart recommendation chips -->
@@ -141,14 +143,45 @@
         </div>
 
         <!-- Add Shopping Item Form -->
-        <form id="add-shopping-form" class="add-shopping-form">
-          <div class="autocomplete-container flex-1">
-            <input type="text" id="shopping-input" placeholder="買うものを入力..." autocomplete="off" required>
-            <div id="shopping-suggestions" class="suggestions-box hidden"></div>
+        <form id="add-shopping-form" class="add-shopping-form" style="display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.02); padding: 8px; border-radius: var(--border-radius-sm); border: 1px solid var(--card-border); margin-bottom: 10px;">
+          <div style="display: flex; gap: 6px; align-items: center; width: 100%;">
+            <div class="autocomplete-container flex-1">
+              <input type="text" id="shopping-input" placeholder="買うものを入力..." autocomplete="off" required style="height: 36px;">
+              <div id="shopping-suggestions" class="suggestions-box hidden"></div>
+            </div>
+            <button type="submit" class="btn-primary btn-square-add" aria-label="追加">
+              <i data-lucide="plus"></i>
+            </button>
           </div>
-          <button type="submit" class="btn-primary btn-square-add" aria-label="追加">
-            <i data-lucide="plus"></i>
-          </button>
+          <div style="display: flex; gap: 6px; width: 100%;">
+            <input type="number" id="shopping-quantity-input" placeholder="数量" min="0.1" step="any" value="1" style="width: 70px; height: 36px; padding: 6px; background: rgba(255, 255, 255, 0.4); border: 1px solid var(--card-border); border-radius: var(--border-radius-sm); outline: none; font-family: var(--font-family); font-size: 0.8rem; box-sizing: border-box;">
+            <select id="shopping-unit-select" style="width: 70px; height: 36px; padding: 6px; background: rgba(255, 255, 255, 0.4); border: 1px solid var(--card-border); border-radius: var(--border-radius-sm); outline: none; font-family: var(--font-family); font-size: 0.8rem; box-sizing: border-box;">
+              <option value="個">個</option>
+              <option value="パック">パック</option>
+              <option value="袋">袋</option>
+              <option value="本">本</option>
+              <option value="g">g</option>
+              <option value="ml">ml</option>
+              <option value="枚">枚</option>
+              <option value="缶">缶</option>
+              <option value="L">L</option>
+              <option value="kg">kg</option>
+            </select>
+            <select id="shopping-category-select" style="flex: 1; height: 36px; padding: 6px; background: rgba(255, 255, 255, 0.4); border: 1px solid var(--card-border); border-radius: var(--border-radius-sm); outline: none; font-family: var(--font-family); font-size: 0.8rem; box-sizing: border-box;">
+              <option value="vegetable">野菜・果物</option>
+              <option value="meat">お肉・お魚</option>
+              <option value="dairy">卵・乳製品</option>
+              <option value="staple">主食・麺類</option>
+              <option value="processed">加工・冷凍</option>
+              <option value="retort">常温・缶詰</option>
+              <option value="drink">飲料・お酒</option>
+              <option value="paper">生活消耗品</option>
+              <option value="cleaning">洗剤・お掃除</option>
+              <option value="bath">ヘア・ボディ</option>
+              <option value="medicine">衛生・健康</option>
+              <option value="other" selected>その他・雑貨</option>
+            </select>
+          </div>
         </form>
 
         <!-- Shopping List Items Container -->
@@ -227,6 +260,11 @@
       </section>
 
     </main>
+
+    <!-- FLOATING ADD BUTTON (outside scrollable area for mobile visibility) -->
+    <button id="btn-open-add-modal" class="fab-button" aria-label="アイテム追加">
+      <i data-lucide="plus"></i>
+    </button>
 
     <!-- ADD FOOD MODAL -->
     <div id="add-modal" class="modal">
@@ -482,6 +520,109 @@
             </button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- EDIT SEASONING MODAL -->
+    <div id="edit-seasoning-modal" class="modal">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>調味料を編集</h2>
+          <button id="btn-close-edit-seasoning-modal" class="icon-button"><i data-lucide="x"></i></button>
+        </div>
+        
+        <form id="edit-seasoning-form">
+          <div class="form-group">
+            <label for="edit-seasoning-name">調味料名</label>
+            <input type="text" id="edit-seasoning-name" placeholder="マヨネーズ など..." autocomplete="off" required>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-seasoning-color">テーマカラー</label>
+            <input type="color" id="edit-seasoning-color" value="#a8a29e">
+          </div>
+
+          <div class="form-group">
+            <label for="edit-seasoning-level">残量</label>
+            <select id="edit-seasoning-level">
+              <option value="full">100% (いっぱい)</option>
+              <option value="high">80%</option>
+              <option value="medium">60%</option>
+              <option value="low">40%</option>
+              <option value="very-low">20%</option>
+              <option value="empty">0% (空)</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 16px;">
+            <button type="submit" class="btn-primary" style="flex: 2;">保存する</button>
+            <button type="button" id="btn-delete-seasoning" class="btn-danger" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 0; box-sizing: border-box; height: 38px;">
+              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+              <span>削除</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- EDIT SHOPPING MODAL -->
+    <div id="edit-shopping-modal" class="modal">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>買い物アイテムを編集</h2>
+          <button id="btn-close-edit-shopping-modal" class="icon-button"><i data-lucide="x"></i></button>
+        </div>
+        
+        <form id="edit-shopping-form">
+          <div class="form-group">
+            <label for="edit-shopping-name">アイテム名</label>
+            <input type="text" id="edit-shopping-name" placeholder="買うものを入力..." required>
+          </div>
+
+          <div class="form-row-split" style="margin-bottom: 12px;">
+            <div class="form-group flex-1" style="margin-bottom: 0;">
+              <label for="edit-shopping-qty">数量</label>
+              <input type="number" id="edit-shopping-qty" placeholder="1" min="0.1" step="any" required>
+            </div>
+            <div class="form-group flex-1" style="margin-bottom: 0;">
+              <label for="edit-shopping-unit">単位</label>
+              <select id="edit-shopping-unit">
+                <option value="個">個</option>
+                <option value="パック">パック</option>
+                <option value="袋">袋</option>
+                <option value="本">本</option>
+                <option value="g">g</option>
+                <option value="ml">ml</option>
+                <option value="枚">枚</option>
+                <option value="缶">缶</option>
+                <option value="L">L</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-shopping-category">カテゴリ</label>
+            <select id="edit-shopping-category">
+              <option value="vegetable">野菜・果物</option>
+              <option value="meat">お肉・お魚</option>
+              <option value="dairy">卵・乳製品</option>
+              <option value="staple">主食・麺類</option>
+              <option value="processed">加工・冷凍</option>
+              <option value="retort">常温・缶詰</option>
+              <option value="drink">飲料・お酒</option>
+              <option value="paper">生活消耗品</option>
+              <option value="cleaning">洗剤・お掃除</option>
+              <option value="bath">ヘア・ボディ</option>
+              <option value="medicine">衛生・健康</option>
+              <option value="other">その他・雑貨</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 16px;">保存する</button>
+        </form>
       </div>
     </div>
 

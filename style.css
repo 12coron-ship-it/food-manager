@@ -219,9 +219,11 @@ html {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   max-width: 500px;
   margin: 0 auto;
   position: relative;
+  overflow: hidden;
   box-shadow: 0 0 24px rgba(0, 0, 0, 0.05);
   background: transparent;
 }
@@ -683,85 +685,88 @@ html {
   cursor: pointer;
 }
 
-.seasonings-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
+/* Add Seasoning Form */
+.add-seasoning-form {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0;
+  align-items: center;
 }
 
-/* Seasoning Card (Fluid volume wave, top-border specific color) */
+.add-seasoning-form input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--card-border);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 0.8rem;
+  border-radius: var(--border-radius-sm);
+  outline: none;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.add-seasoning-form input[type="text"]:focus {
+  border-color: var(--card-border-active);
+}
+
+.add-seasoning-form input[type="color"] {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-sm);
+  padding: 2px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.seasonings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Seasoning Card (List item matching stock card layout) */
 .seasoning-card {
   position: relative;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
-  height: 82px;
-  padding: 4px;
+  padding: 5px 8px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-top: 3px solid var(--seasoning-color) !important;
-  border-left: none !important;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  transition: border-color 0.1s, box-shadow 0.1s;
   overflow: hidden;
+  gap: 6px;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s;
+  height: auto;
 }
 
 .seasoning-card:active {
-  transform: scale(0.96);
+  transform: scale(0.99);
 }
 
-.seasoning-name {
-  font-weight: 700;
-  font-size: 0.65rem;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text-primary);
-  margin-top: 1px;
-}
-
-/* Horizontal liquid gauge bar container */
-.seasoning-gauge-container {
-  position: relative;
-  width: 100%;
-  height: 14px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 3px;
-  overflow: hidden;
-  margin: 3px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.seasoning-gauge-bar {
+.seasoning-card::before {
+  content: '';
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  background: var(--seasoning-color) !important;
-  opacity: 0.45;
-  transition: width 0.3s ease;
+  width: 4px;
+  background-color: var(--seasoning-color) !important;
 }
 
-.seasoning-gauge-text {
-  position: relative;
-  font-size: 0.55rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  z-index: 2;
-}
-
-/* Stock controls at bottom */
+/* Stock controls in seasoning row */
 .seasoning-stock-control {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: auto;
-  gap: 2px;
+  gap: 3px;
 }
 
 .btn-stock-dec, .btn-stock-inc {
@@ -884,6 +889,33 @@ html {
   border-color: var(--accent-color);
 }
 
+.btn-chip-ignore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 4px;
+  padding: 0;
+  transition: all 0.1s;
+}
+
+.btn-chip-ignore:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--alert-expired);
+}
+
+.btn-chip-ignore i,
+.btn-chip-ignore svg {
+  width: 8px;
+  height: 8px;
+}
+
 .add-shopping-form {
   display: flex;
   gap: 6px;
@@ -892,6 +924,7 @@ html {
 }
 
 .add-shopping-form .autocomplete-container {
+  flex: 1;
   min-width: 0;
 }
 
@@ -902,13 +935,11 @@ html {
   border: 1px solid var(--card-border);
   color: var(--text-primary);
   font-family: var(--font-family);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   border-radius: var(--border-radius-sm);
   outline: none;
-  height: 42px;
+  height: 36px;
   box-sizing: border-box;
-  min-width: 0;
-  flex: 1;
 }
 
 .add-shopping-form input[type="text"]:focus {
@@ -916,8 +947,8 @@ html {
 }
 
 .btn-square-add {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -925,6 +956,12 @@ html {
   border-radius: var(--border-radius-sm);
   flex-shrink: 0;
   box-sizing: border-box;
+}
+
+.btn-primary.btn-square-add {
+  width: 36px;
+  height: 36px;
+  padding: 0;
 }
 
 .btn-square-add i {
@@ -1179,6 +1216,35 @@ html {
   border: 1px solid rgba(185, 28, 28, 0.15);
 }
 
+/* History Undo/Restore button */
+.btn-restore {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-family);
+  transition: all 0.1s;
+}
+
+.btn-restore:active {
+  background: var(--accent-bg);
+  color: #ffffff;
+  border-color: var(--accent-bg);
+}
+
+.btn-restore i,
+.btn-restore svg {
+  width: 10px;
+  height: 10px;
+}
+
 /* ==========================================================================
    BUTTONS AND INTERACTIVE ELEMENTS
    ========================================================================== */
@@ -1201,13 +1267,14 @@ html {
   background: rgba(0, 0, 0, 0.03);
 }
 
-/* Floating Action Button (FAB) */
+/* Floating Action Button (FAB) - Fixed position on mobile, absolute on desktop */
 .fab-button {
-  position: absolute;
-  bottom: 16px;
+  position: fixed;
+  bottom: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   right: 16px;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--accent-bg);
   color: #ffffff;
@@ -1216,8 +1283,19 @@ html {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px var(--accent-glow);
-  z-index: 5;
+  box-shadow: 0 4px 12px var(--accent-glow), 0 2px 4px rgba(0,0,0,0.15);
+  z-index: 20;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+@media (min-width: 500px) {
+  .fab-button {
+    position: absolute;
+  }
+}
+
+.fab-button.hidden {
+  display: none;
 }
 
 .fab-button:active {
@@ -1225,8 +1303,8 @@ html {
 }
 
 .fab-button i {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 /* Standard Button Variations */
@@ -1859,3 +1937,31 @@ html {
   width: 12px;
   height: 12px;
 }
+
+/* Category styling for select dropdowns and options */
+#shopping-category-select[class*="cat-color-"],
+#edit-shopping-category[class*="cat-color-"] {
+  border-color: var(--cat-color) !important;
+  background-color: var(--cat-glow) !important;
+  color: var(--cat-color) !important;
+  font-weight: 700;
+}
+
+#shopping-category-select option,
+#edit-shopping-category option {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+#shopping-category-select option[value="vegetable"], #edit-shopping-category option[value="vegetable"] { color: #16a34a !important; font-weight: 700; }
+#shopping-category-select option[value="meat"], #edit-shopping-category option[value="meat"] { color: #dc2626 !important; font-weight: 700; }
+#shopping-category-select option[value="dairy"], #edit-shopping-category option[value="dairy"] { color: #ea580c !important; font-weight: 700; }
+#shopping-category-select option[value="staple"], #edit-shopping-category option[value="staple"] { color: #d97706 !important; font-weight: 700; }
+#shopping-category-select option[value="processed"], #edit-shopping-category option[value="processed"] { color: #db2777 !important; font-weight: 700; }
+#shopping-category-select option[value="retort"], #edit-shopping-category option[value="retort"] { color: #78350f !important; font-weight: 700; }
+#shopping-category-select option[value="drink"], #edit-shopping-category option[value="drink"] { color: #7c3aed !important; font-weight: 700; }
+#shopping-category-select option[value="paper"], #edit-shopping-category option[value="paper"] { color: #0d9488 !important; font-weight: 700; }
+#shopping-category-select option[value="cleaning"], #edit-shopping-category option[value="cleaning"] { color: #0891b2 !important; font-weight: 700; }
+#shopping-category-select option[value="bath"], #edit-shopping-category option[value="bath"] { color: #f43f5e !important; font-weight: 700; }
+#shopping-category-select option[value="medicine"], #edit-shopping-category option[value="medicine"] { color: #059669 !important; font-weight: 700; }
+#shopping-category-select option[value="other"], #edit-shopping-category option[value="other"] { color: #64748b !important; font-weight: 700; }

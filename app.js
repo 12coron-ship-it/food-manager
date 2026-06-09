@@ -28,6 +28,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // Track food item being edited
   let editingFoodId = null;
 
+  // Track seasoning item being edited
+  let editingSeasoningId = null;
+
+  // Track shopping list item being edited
+  let editingShoppingId = null;
+
+  // IME input flags
+  let isComposingFoodName = false;
+  let isComposingShoppingName = false;
+
+  // User manual overrides
+  let userManuallySetFoodCategory = false;
+  let userManuallySetFoodStorage = false;
+  let userManuallySetShoppingCategory = false;
+  let userManuallySetShoppingUnit = false;
+  let userManuallySetShoppingQuantity = false;
+
   // --- DOM ELEMENTS ---
   const body = document.body;
   
@@ -96,6 +113,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const shoppingSuggestions = document.getElementById('shopping-suggestions');
   const shoppingRecommendations = document.getElementById('shopping-recommendations');
   const recommendationChips = document.getElementById('recommendation-chips');
+  const shoppingQuantityInput = document.getElementById('shopping-quantity-input');
+  const shoppingUnitSelect = document.getElementById('shopping-unit-select');
+  const shoppingCategorySelect = document.getElementById('shopping-category-select');
+
+  // Edit Shopping Modal UI elements
+  const editShoppingModal = document.getElementById('edit-shopping-modal');
+  const btnCloseEditShoppingModal = document.getElementById('btn-close-edit-shopping-modal');
+  const editShoppingForm = document.getElementById('edit-shopping-form');
+  const editShoppingName = document.getElementById('edit-shopping-name');
+  const editShoppingQty = document.getElementById('edit-shopping-qty');
+  const editShoppingUnit = document.getElementById('edit-shopping-unit');
+  const editShoppingCategory = document.getElementById('edit-shopping-category');
   
   // History UI elements
   const btnClearHistory = document.getElementById('btn-clear-history');
@@ -107,6 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const importJsonFile = document.getElementById('import-json-file');
   const btnResetData = document.getElementById('btn-reset-data');
   const seasoningSortSelect = document.getElementById('seasoning-sort-select');
+
+  // Seasoning Add Form
+  const addSeasoningForm = document.getElementById('add-seasoning-form');
+  const seasoningNameInput = document.getElementById('seasoning-name-input');
+  const seasoningColorInput = document.getElementById('seasoning-color-input');
+
+  // Seasoning Edit Modal UI elements
+  const editSeasoningModal = document.getElementById('edit-seasoning-modal');
+  const btnCloseEditSeasoningModal = document.getElementById('btn-close-edit-seasoning-modal');
+  const editSeasoningForm = document.getElementById('edit-seasoning-form');
+  const editSeasoningName = document.getElementById('edit-seasoning-name');
+  const editSeasoningColor = document.getElementById('edit-seasoning-color');
+  const editSeasoningLevel = document.getElementById('edit-seasoning-level');
+  const editSeasoningRecommend = document.getElementById('edit-seasoning-recommend');
+  const btnDeleteSeasoning = document.getElementById('btn-delete-seasoning');
 
   // Help Modal UI elements
   const helpModal = document.getElementById('help-modal');
@@ -230,6 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderShoppingList();
     renderHistory();
     updateThemeSelectorUI();
+    updateShoppingCategorySelectColor();
     setupEventListeners();
     
     // Initial icon render
@@ -798,6 +843,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editingFoodId = id;
     shoppingItemBeingRegistered = null; // cancel shopping list registration if active
+    userManuallySetFoodCategory = true;
+    userManuallySetFoodStorage = true;
 
     // Update modal title and button text
     const modalHeaderTitle = document.querySelector('#add-modal .modal-header h2');
@@ -877,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleFoodAction(actionType) {
     if (!confirmingFoodItem) return;
     
-    // Create history entry
+    // Create history entry with all food metadata for restore capability
     const historyItem = {
       id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
       name: confirmingFoodItem.name,
@@ -885,7 +932,11 @@ document.addEventListener('DOMContentLoaded', () => {
       action: actionType, // 'consume' or 'discard'
       amount: confirmingFoodItem.initialAmount,
       unit: confirmingFoodItem.unit,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      storageType: confirmingFoodItem.storageType || 'fridge',
+      quantity: confirmingFoodItem.quantity !== undefined ? confirmingFoodItem.quantity : 100,
+      expiryDate: confirmingFoodItem.expiryDate || null,
+      dateAdded: confirmingFoodItem.dateAdded || getTodayDateString()
     };
     
     state.history.push(historyItem);
@@ -948,23 +999,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       card.innerHTML = `
-        <div class="seasoning-name">${escapeHtml(seasoning.name)}</div>
-        <div class="seasoning-gauge-container">
-          <div class="seasoning-gauge-bar" style="width: ${percent}%;"></div>
-          <span class="seasoning-gauge-text">${percent}%</span>
+        <div class="food-card-left" style="flex: 1; display: flex; align-items: center; gap: 6px; min-width: 0;">
+          <div class="food-icon-wrapper" style="background-color: var(--seasoning-color) !important; color: #ffffff !important; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <i data-lucide="flask-conical"></i>
+          </div>
+          <div class="food-info" style="display: flex; flex-direction: column; min-width: 0;">
+            <span class="food-name-txt" style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(seasoning.name)}</span>
+          </div>
         </div>
-        <div class="seasoning-stock-control">
-          <button class="btn-stock-dec" aria-label="スペア減">-</button>
-          <span class="seasoning-stock-info">
-            <i data-lucide="package" class="stock-icon"></i>
-            <span class="stock-count">${seasoning.stock || 0}</span>
-          </span>
-          <button class="btn-stock-inc" aria-label="スペア増">+</button>
+        <div class="food-card-right" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+          <div class="seasoning-stock-control" style="margin-top: 0; margin-right: 2px; gap: 3px; display: flex; align-items: center;">
+            <button class="btn-stock-dec" aria-label="スペア減">-</button>
+            <span class="seasoning-stock-info" style="display: flex; align-items: center; gap: 1px; font-size: 0.6rem; font-weight: 800; color: var(--text-secondary);">
+              <i data-lucide="package" class="stock-icon" style="width: 8px; height: 8px; color: var(--text-muted);"></i>
+              <span class="stock-count">${seasoning.stock || 0}</span>
+            </span>
+            <button class="btn-stock-inc" aria-label="スペア増">+</button>
+          </div>
+          <button class="btn-quantity-toggle" data-qty-percent="${percent}" aria-label="残量を変更">
+            ${percent}%
+          </button>
         </div>
       `;
       
       const decBtn = card.querySelector('.btn-stock-dec');
       const incBtn = card.querySelector('.btn-stock-inc');
+      const qtyBtn = card.querySelector('.btn-quantity-toggle');
       
       decBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -975,9 +1035,14 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         adjustSeasoningStock(seasoning.id, 1);
       });
+
+      qtyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        cycleSeasoningLevel(seasoning.id);
+      });
       
       card.addEventListener('click', () => {
-        cycleSeasoningLevel(seasoning.id);
+        openEditSeasoningModal(seasoning.id);
       });
 
       seasoningsGrid.appendChild(card);
@@ -992,9 +1057,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const levels = ['full', 'high', 'medium', 'low', 'very-low', 'empty'];
       const currentLevel = state.seasonings[index].level;
       const nextIndex = (levels.indexOf(currentLevel) + 1) % levels.length;
+      const nextLevel = levels[nextIndex];
       
-      state.seasonings[index].level = levels[nextIndex];
+      // If cycling from empty to full, consume 1 stock if available
+      if (currentLevel === 'empty' && nextLevel === 'full') {
+        const currentStock = state.seasonings[index].stock || 0;
+        if (currentStock > 0) {
+          state.seasonings[index].stock = currentStock - 1;
+        }
+      }
+      
+      state.seasonings[index].level = nextLevel;
       state.seasonings[index].clicks = (state.seasonings[index].clicks || 0) + 1;
+      
+      // Reset ignore recommendation since level changed
+      state.seasonings[index].recommendIgnored = false;
       
       saveSeasonings();
       renderSeasonings();
@@ -1009,6 +1086,34 @@ document.addEventListener('DOMContentLoaded', () => {
       state.seasonings[index].stock = Math.max(0, currentStock + diff);
       saveSeasonings();
       renderSeasonings();
+    }
+  }
+
+  function openEditSeasoningModal(id) {
+    const seasoning = state.seasonings.find(s => s.id === id);
+    if (!seasoning) return;
+
+    editingSeasoningId = id;
+    editSeasoningName.value = seasoning.name;
+    editSeasoningColor.value = seasoning.color || '#a8a29e';
+    editSeasoningLevel.value = seasoning.level || 'full';
+
+    if (editSeasoningModal) editSeasoningModal.classList.add('active');
+    if (editSeasoningName) editSeasoningName.focus();
+  }
+
+  function closeEditSeasoningModal() {
+    if (editSeasoningModal) editSeasoningModal.classList.remove('active');
+    editingSeasoningId = null;
+  }
+
+  function ignoreSeasoningRecommendation(id) {
+    const idx = state.seasonings.findIndex(s => s.id === id);
+    if (idx > -1) {
+      state.seasonings[idx].recommendIgnored = true;
+      saveSeasonings();
+      renderShoppingRecommendations();
+      showToast(`「${state.seasonings[idx].name}」の買い物提案を非表示にしました`, 'info');
     }
   }
 
@@ -1083,6 +1188,10 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         `;
 
+        card.addEventListener('click', () => {
+          openEditShoppingModal(item.id);
+        });
+
         listContainer.appendChild(card);
       });
 
@@ -1092,6 +1201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add bought-check click event (opens pre-filled registration modal)
     document.querySelectorAll('.btn-check-cart').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const id = e.currentTarget.getAttribute('data-id');
         startBoughtRegistration(id);
       });
@@ -1100,6 +1210,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add delete click event
     document.querySelectorAll('.btn-delete-shopping').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const id = e.currentTarget.getAttribute('data-id');
         deleteShoppingItem(id);
       });
@@ -1118,12 +1229,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function openEditShoppingModal(id) {
+    const item = state.shopping.find(i => i.id === id);
+    if (!item) return;
+
+    editingShoppingId = id;
+    
+    // Prefill fields
+    editShoppingName.value = item.name;
+    editShoppingQty.value = item.initialAmount;
+    editShoppingUnit.value = item.unit;
+    editShoppingCategory.value = item.category || 'other';
+    updateEditShoppingCategorySelectColor();
+
+    if (editShoppingModal) editShoppingModal.classList.add('active');
+    if (editShoppingName) editShoppingName.focus();
+  }
+
+  function closeEditShoppingModal() {
+    if (editShoppingModal) editShoppingModal.classList.remove('active');
+    editingShoppingId = null;
+  }
+
+  function updateShoppingCategorySelectColor() {
+    if (!shoppingCategorySelect) return;
+    const val = shoppingCategorySelect.value;
+    Array.from(shoppingCategorySelect.classList).forEach(cls => {
+      if (cls.startsWith('cat-color-')) {
+        shoppingCategorySelect.classList.remove(cls);
+      }
+    });
+    shoppingCategorySelect.classList.add(`cat-color-${val}`);
+  }
+
+  function updateEditShoppingCategorySelectColor() {
+    if (!editShoppingCategory) return;
+    const val = editShoppingCategory.value;
+    Array.from(editShoppingCategory.classList).forEach(cls => {
+      if (cls.startsWith('cat-color-')) {
+        editShoppingCategory.classList.remove(cls);
+      }
+    });
+    editShoppingCategory.classList.add(`cat-color-${val}`);
+  }
+
   // Pre-fills form fields when checking out a shopping list item
   function startBoughtRegistration(shoppingId) {
     const item = state.shopping.find(i => i.id === shoppingId);
     if (!item) return;
 
     shoppingItemBeingRegistered = shoppingId;
+    userManuallySetFoodCategory = false;
+    userManuallySetFoodStorage = false;
 
     // Reset autocomplete values
     currentDefaultDays = null;
@@ -1176,11 +1333,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderShoppingRecommendations() {
     recommendationChips.innerHTML = '';
     
-    // Find seasonings where level is low/empty, AND they aren't already in the shopping list
+    // Find seasonings where level is low/empty, AND they aren't already in the shopping list, AND recommendation is not ignored
     const targets = state.seasonings.filter(s => {
       const isLowOrEmpty = s.level === 'empty' || s.level === 'very-low' || s.level === 'low';
       const alreadyInList = state.shopping.some(item => item.name === s.name);
-      return isLowOrEmpty && !alreadyInList;
+      const isIgnored = s.recommendIgnored === true;
+      return isLowOrEmpty && !alreadyInList && !isIgnored;
     });
 
     if (targets.length === 0) {
@@ -1189,18 +1347,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     targets.forEach(s => {
-      const chip = document.createElement('button');
+      const chip = document.createElement('div');
       chip.className = 'btn-chip';
-      chip.setAttribute('type', 'button');
       chip.style.setProperty('--seasoning-color', s.color || '#a8a29e');
       chip.innerHTML = `
-        <i data-lucide="plus"></i>
-        <span>${s.name} を買う</span>
+        <span class="chip-main-action" style="display: flex; align-items: center; gap: 3px; cursor: pointer;">
+          <i data-lucide="plus"></i>
+          <span>${s.name} を買う</span>
+        </span>
+        <button type="button" class="btn-chip-ignore" data-id="${s.id}" title="非表示にする" aria-label="提案を非表示">
+          <i data-lucide="x"></i>
+        </button>
       `;
       
-      chip.addEventListener('click', () => {
+      const mainAction = chip.querySelector('.chip-main-action');
+      mainAction.addEventListener('click', () => {
         addRecommendedToShopping(s);
       });
+      
+      const ignoreBtn = chip.querySelector('.btn-chip-ignore');
+      ignoreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        ignoreSeasoningRecommendation(s.id);
+      });
+
       recommendationChips.appendChild(chip);
     });
 
@@ -1267,13 +1437,67 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="history-card-right">
           <span class="history-badge ${badgeClass}">${badgeText}</span>
+          <button class="btn-restore" data-id="${item.id}" title="ストックに戻す" aria-label="元に戻す">
+            <i data-lucide="undo-2"></i>
+            <span>戻す</span>
+          </button>
         </div>
       `;
       
       historyListContainer.appendChild(card);
     });
 
+    // Add event listeners for restore buttons
+    historyListContainer.querySelectorAll('.btn-restore').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        restoreHistoryItem(id);
+      });
+    });
+
     createIconsSafe();
+  }
+
+  function restoreHistoryItem(id) {
+    const itemIndex = state.history.findIndex(item => item.id === id);
+    if (itemIndex === -1) return;
+
+    const item = state.history[itemIndex];
+
+    // Reconstruct the food item
+    // If the quantity was 0% (e.g. they cycled it to 0 and confirmed consume/discard),
+    // restore it with 100% (or the default qtyStep) so that it is actually visible and has quantity.
+    let quantityToRestore = item.quantity;
+    if (quantityToRestore === undefined || quantityToRestore === 0) {
+      quantityToRestore = 100;
+    }
+
+    const restoredFood = {
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+      name: item.name,
+      category: item.category,
+      storageType: item.storageType || getCategoryAndStorageByName(item.name).storage || 'fridge',
+      quantity: quantityToRestore,
+      initialAmount: item.amount,
+      unit: item.unit,
+      expiryDate: item.expiryDate || null,
+      dateAdded: item.dateAdded || getTodayDateString()
+    };
+
+    // Remove from history
+    state.history.splice(itemIndex, 1);
+    saveHistory();
+
+    // Add back to foods
+    state.foods.push(restoredFood);
+    saveFoods();
+
+    // Re-render
+    renderFoods();
+    renderHistory();
+    renderShoppingRecommendations(); // Recalculate shopping suggestions since food was added
+
+    showToast(`「${item.name}」をストックに戻しました`);
   }
 
   // --- AUTOCOMPLETE / SUGGESTIONS ---
@@ -1339,19 +1563,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!query) return;
     const detected = getCategoryAndStorageByName(query);
     
-    const catRadio = document.querySelector(`.category-radio input[value="${detected.category}"]`);
-    if (catRadio) {
-      catRadio.checked = true;
-      updateModalCategoryColor(detected.category);
+    if (!userManuallySetFoodCategory) {
+      const catRadio = document.querySelector(`.category-radio input[value="${detected.category}"]`);
+      if (catRadio) {
+        catRadio.checked = true;
+        updateModalCategoryColor(detected.category);
+      }
     }
-    const storageRadio = document.querySelector(`.storage-radio input[value="${detected.storage}"]`);
-    if (storageRadio) {
-      storageRadio.checked = true;
+    if (!userManuallySetFoodStorage) {
+      const storageRadio = document.querySelector(`.storage-radio input[value="${detected.storage}"]`);
+      if (storageRadio) {
+        storageRadio.checked = true;
+      }
     }
   }
 
   // --- AUTOCOMPLETE / SUGGESTIONS ---
   function handleNameInput(e) {
+    if (isComposingFoodName) return;
     const query = e.target.value.trim().toLowerCase();
     
     if (!query) {
@@ -1494,14 +1723,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function detectShoppingCategoryAndUnit(query) {
+    if (!query) return;
+    const detected = getCategoryAndStorageByName(query);
+    
+    if (!userManuallySetShoppingCategory && shoppingCategorySelect) {
+      shoppingCategorySelect.value = detected.category;
+      updateShoppingCategorySelectColor();
+    }
+    if (!userManuallySetShoppingUnit && shoppingUnitSelect) {
+      shoppingUnitSelect.value = detected.unit;
+    }
+  }
+
   // --- AUTOCOMPLETE FOR SHOPPING LIST ADD ---
   function handleShoppingNameInput(e) {
+    if (isComposingShoppingName) return;
     const query = e.target.value.trim().toLowerCase();
     
     if (!query) {
       shoppingSuggestions.classList.add('hidden');
       return;
     }
+
+    // Auto-detect category and unit
+    detectShoppingCategoryAndUnit(query);
 
     if (!window.DEFAULT_FOODS) return;
 
@@ -1525,6 +1771,17 @@ document.addEventListener('DOMContentLoaded', () => {
       row.addEventListener('click', () => {
         shoppingInput.value = item.name;
         shoppingSuggestions.classList.add('hidden');
+        
+        if (!userManuallySetShoppingCategory && shoppingCategorySelect) {
+          shoppingCategorySelect.value = item.category;
+          updateShoppingCategorySelectColor();
+        }
+        if (!userManuallySetShoppingUnit && shoppingUnitSelect) {
+          shoppingUnitSelect.value = item.defaultUnit;
+        }
+        if (shoppingQuantityInput && !userManuallySetShoppingQuantity) {
+          shoppingQuantityInput.value = item.defaultAmount;
+        }
       });
       shoppingSuggestions.appendChild(row);
     });
@@ -1532,9 +1789,8 @@ document.addEventListener('DOMContentLoaded', () => {
     shoppingSuggestions.classList.remove('hidden');
   }
 
-  // --- EVENT LISTENERS ---
-  function setupEventListeners() {
-    // Tab switching (4 tabs)
+  // --- TAB TRANSITIONS ---
+  function switchTab(index) {
     const tabs = [
       { btn: tabFoods, sec: sectionFoods },
       { btn: tabSeasonings, sec: sectionSeasonings },
@@ -1542,23 +1798,91 @@ document.addEventListener('DOMContentLoaded', () => {
       { btn: tabHistory, sec: sectionHistory }
     ];
 
-    tabs.forEach(t => {
-      if (t.btn && t.sec) {
-        t.btn.addEventListener('click', () => {
-          tabs.forEach(o => {
-            if (o.btn) o.btn.classList.remove('active');
-            if (o.sec) o.sec.classList.remove('active');
-          });
-          t.btn.classList.add('active');
-          t.sec.classList.add('active');
-          
-          // Refresh recommendations chip when clicking Shopping tab
-          if (t.btn === tabShopping) {
-            renderShoppingRecommendations();
-          }
+    if (index < 0 || index >= tabs.length) return;
+
+    tabs.forEach((o, i) => {
+      if (o.btn) {
+        if (i === index) o.btn.classList.add('active');
+        else o.btn.classList.remove('active');
+      }
+      if (o.sec) {
+        if (i === index) o.sec.classList.add('active');
+        else o.sec.classList.remove('active');
+      }
+    });
+
+    // Show FAB only on foods tab
+    if (btnOpenAddModal) {
+      if (index === 0) {
+        btnOpenAddModal.classList.remove('hidden');
+      } else {
+        btnOpenAddModal.classList.add('hidden');
+      }
+    }
+
+    // Refresh recommendations chip when clicking Shopping tab
+    if (index === 2) {
+      renderShoppingRecommendations();
+    }
+  }
+
+  function getActiveTabIndex() {
+    const tabs = [tabFoods, tabSeasonings, tabShopping, tabHistory];
+    return tabs.findIndex(btn => btn && btn.classList.contains('active'));
+  }
+
+  // --- EVENT LISTENERS ---
+  function setupEventListeners() {
+    // Tab switching (4 tabs)
+    const tabButtons = [tabFoods, tabSeasonings, tabShopping, tabHistory];
+    tabButtons.forEach((btn, i) => {
+      if (btn) {
+        btn.addEventListener('click', () => {
+          switchTab(i);
         });
       }
     });
+
+    // Swipe gesture detection to switch tabs
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    const mainContent = document.querySelector('.app-content');
+    if (mainContent) {
+      mainContent.addEventListener('touchstart', (e) => {
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal) return;
+
+        touchStartX = e.changedTouches[0].clientX;
+        touchStartY = e.changedTouches[0].clientY;
+      }, { passive: true });
+
+      mainContent.addEventListener('touchend', (e) => {
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal) return;
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        if (Math.abs(diffX) > 60 && Math.abs(diffY) < 40) {
+          const currentIndex = getActiveTabIndex();
+          if (currentIndex === -1) return;
+
+          if (diffX < 0) {
+            if (currentIndex < 3) {
+              switchTab(currentIndex + 1);
+            }
+          } else {
+            if (currentIndex > 0) {
+              switchTab(currentIndex - 1);
+            }
+          }
+        }
+      }, { passive: true });
+    }
 
     // Time axis tabs click in History analytics card
     document.querySelectorAll('.btn-stats-time').forEach(btn => {
@@ -1575,6 +1899,8 @@ document.addEventListener('DOMContentLoaded', () => {
       btnOpenAddModal.addEventListener('click', () => {
         shoppingItemBeingRegistered = null; // not registering from shopping list
         editingFoodId = null; // reset editing state
+        userManuallySetFoodCategory = false;
+        userManuallySetFoodStorage = false;
 
         const modalHeaderTitle = document.querySelector('#add-modal .modal-header h2');
         if (modalHeaderTitle) modalHeaderTitle.textContent = 'アイテムを追加';
@@ -1611,6 +1937,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCloseAddModal) {
       btnCloseAddModal.addEventListener('click', () => {
         if (addModal) addModal.classList.remove('active');
+      });
+    }
+
+    // Add Seasoning Form
+    if (addSeasoningForm) {
+      addSeasoningForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = seasoningNameInput.value.trim();
+        if (!name) return;
+
+        // Check duplicate
+        const duplicate = state.seasonings.find(s => s.name === name);
+        if (duplicate) {
+          showToast(`「${name}」は既に登録されています`, 'error');
+          return;
+        }
+
+        const newSeasoning = {
+          id: 'custom_' + Date.now().toString(36),
+          name: name,
+          category: 'custom',
+          level: 'full',
+          clicks: 0,
+          color: seasoningColorInput.value || '#a8a29e',
+          stock: 0
+        };
+
+        state.seasonings.push(newSeasoning);
+        saveSeasonings();
+        renderSeasonings();
+        showToast(`「${name}」を追加しました`);
+
+        seasoningNameInput.value = '';
+        seasoningColorInput.value = '#a8a29e';
       });
     }
 
@@ -1655,6 +2015,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addModal) addModal.classList.remove('active');
         if (settingsModal) settingsModal.classList.remove('active');
         if (helpModal) helpModal.classList.remove('active');
+        if (editSeasoningModal) editSeasoningModal.classList.remove('active');
+        closeEditShoppingModal();
         closeConfirmModal();
       });
     });
@@ -1671,8 +2033,123 @@ document.addEventListener('DOMContentLoaded', () => {
       seasoningSortSelect.addEventListener('change', renderSeasonings);
     }
 
+    // Seasoning Edit Modal events
+    if (btnCloseEditSeasoningModal) {
+      btnCloseEditSeasoningModal.addEventListener('click', closeEditSeasoningModal);
+    }
+
+    if (editSeasoningForm) {
+      editSeasoningForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!editingSeasoningId) return;
+
+        const name = editSeasoningName.value.trim();
+        const color = editSeasoningColor.value;
+        const level = editSeasoningLevel.value;
+
+        if (!name) return;
+
+        // Check duplicate seasoning name (excluding itself)
+        const duplicate = state.seasonings.find(s => s.name === name && s.id !== editingSeasoningId);
+        if (duplicate) {
+          showToast(`「${name}」は既に登録されています`, 'error');
+          return;
+        }
+
+        const index = state.seasonings.findIndex(s => s.id === editingSeasoningId);
+        if (index > -1) {
+          const oldLevel = state.seasonings[index].level;
+          
+          // If changing from empty to full, consume 1 stock if available
+          if (oldLevel === 'empty' && level === 'full') {
+            const currentStock = state.seasonings[index].stock || 0;
+            if (currentStock > 0) {
+              state.seasonings[index].stock = currentStock - 1;
+            }
+          }
+          
+          state.seasonings[index].name = name;
+          state.seasonings[index].color = color;
+          state.seasonings[index].level = level;
+          
+          // Reset ignore recommendation since level changed
+          if (oldLevel !== level) {
+            state.seasonings[index].recommendIgnored = false;
+          }
+
+          saveSeasonings();
+          renderSeasonings();
+          renderShoppingRecommendations(); // Update quick-add chips
+          closeEditSeasoningModal();
+          showToast(`「${name}」を更新しました！`);
+        }
+      });
+    }
+
+    if (btnDeleteSeasoning) {
+      btnDeleteSeasoning.addEventListener('click', () => {
+        if (!editingSeasoningId) return;
+
+        const seasoning = state.seasonings.find(s => s.id === editingSeasoningId);
+        if (!seasoning) return;
+
+        if (confirm(`「${seasoning.name}」を削除しますか？`)) {
+          const index = state.seasonings.findIndex(s => s.id === editingSeasoningId);
+          if (index > -1) {
+            state.seasonings.splice(index, 1);
+            saveSeasonings();
+            renderSeasonings();
+            renderShoppingRecommendations(); // Update quick-add chips
+            closeEditSeasoningModal();
+            showToast(`「${seasoning.name}」を削除しました`, 'info');
+          }
+        }
+      });
+    }
+
+    // Shopping Edit Modal events
+    if (btnCloseEditShoppingModal) {
+      btnCloseEditShoppingModal.addEventListener('click', closeEditShoppingModal);
+    }
+
+    if (editShoppingForm) {
+      editShoppingForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!editingShoppingId) return;
+
+        const name = editShoppingName.value.trim();
+        const qty = parseFloat(editShoppingQty.value);
+        const unit = editShoppingUnit.value;
+        const category = editShoppingCategory.value;
+
+        if (!name) return;
+
+        const index = state.shopping.findIndex(i => i.id === editingShoppingId);
+        if (index > -1) {
+          state.shopping[index].name = name;
+          state.shopping[index].initialAmount = isNaN(qty) ? 1 : qty;
+          state.shopping[index].unit = unit;
+          state.shopping[index].category = category;
+
+          saveShopping();
+          renderShoppingList();
+          closeEditShoppingModal();
+          showToast(`「${name}」を更新しました！`);
+        }
+      });
+    }
+
     // Form Autocomplete
-    if (inputFoodName) inputFoodName.addEventListener('input', handleNameInput);
+    if (inputFoodName) {
+      inputFoodName.addEventListener('input', handleNameInput);
+      inputFoodName.addEventListener('compositionstart', () => {
+        isComposingFoodName = true;
+      });
+      inputFoodName.addEventListener('compositionend', (e) => {
+        isComposingFoodName = false;
+        handleNameInput(e);
+      });
+    }
 
     // Form unit change updates additive buttons
     if (selectFoodUnit) selectFoodUnit.addEventListener('change', updateAmountIncrementButtons);
@@ -1681,6 +2158,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('input[name="food-storage"]').forEach(radio => {
       radio.addEventListener('change', () => {
         updateFormExpiryDate();
+        userManuallySetFoodStorage = true;
       });
     });
 
@@ -1688,6 +2166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('input[name="food-category"]').forEach(radio => {
       radio.addEventListener('change', (e) => {
         updateModalCategoryColor(e.target.value);
+        userManuallySetFoodCategory = true;
       });
     });
 
@@ -1860,15 +2339,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = shoppingInput ? shoppingInput.value.trim() : '';
         if (!name) return;
   
+        const quantity = shoppingQuantityInput ? parseFloat(shoppingQuantityInput.value) : 1;
+        const unit = shoppingUnitSelect ? shoppingUnitSelect.value : '個';
+        const category = shoppingCategorySelect ? shoppingCategorySelect.value : 'other';
         const detected = getCategoryAndStorageByName(name);
   
         const newItem = {
           id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
           name: name,
-          category: detected.category,
-          initialAmount: detected.amount,
-          unit: detected.unit,
-          storageType: detected.storage
+          category: category,
+          initialAmount: isNaN(quantity) ? 1 : quantity,
+          unit: unit,
+          storageType: detected.storage || 'room'
         };
   
         state.shopping.push(newItem);
@@ -1876,6 +2358,17 @@ document.addEventListener('DOMContentLoaded', () => {
         renderShoppingList();
         
         if (shoppingInput) shoppingInput.value = '';
+        if (shoppingQuantityInput) shoppingQuantityInput.value = '1';
+        if (shoppingUnitSelect) shoppingUnitSelect.value = '個';
+        if (shoppingCategorySelect) {
+          shoppingCategorySelect.value = 'other';
+          updateShoppingCategorySelectColor();
+        }
+        
+        userManuallySetShoppingQuantity = false;
+        userManuallySetShoppingUnit = false;
+        userManuallySetShoppingCategory = false;
+        
         if (shoppingSuggestions) shoppingSuggestions.classList.add('hidden');
         showToast(`「${name}」を追加しました`);
       });
@@ -1884,6 +2377,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-complete in Shopping list input
     if (shoppingInput) {
       shoppingInput.addEventListener('input', handleShoppingNameInput);
+      shoppingInput.addEventListener('compositionstart', () => {
+        isComposingShoppingName = true;
+      });
+      shoppingInput.addEventListener('compositionend', (e) => {
+        isComposingShoppingName = false;
+        handleShoppingNameInput(e);
+      });
+    }
+
+    if (shoppingQuantityInput) {
+      shoppingQuantityInput.addEventListener('change', () => {
+        userManuallySetShoppingQuantity = true;
+      });
+    }
+    if (shoppingUnitSelect) {
+      shoppingUnitSelect.addEventListener('change', () => {
+        userManuallySetShoppingUnit = true;
+      });
+    }
+    if (shoppingCategorySelect) {
+      shoppingCategorySelect.addEventListener('change', () => {
+        userManuallySetShoppingCategory = true;
+        updateShoppingCategorySelectColor();
+      });
+    }
+    if (editShoppingCategory) {
+      editShoppingCategory.addEventListener('change', () => {
+        updateEditShoppingCategorySelectColor();
+      });
     }
 
     // Clear History Button handler
