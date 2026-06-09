@@ -12,14 +12,14 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-theme="organic">
+<body data-theme="organic" data-lang="ja">
   <div class="app-container">
     
     <!-- HEADER -->
     <header class="app-header">
       <div class="logo-area">
         <i data-lucide="package" class="header-icon"></i>
-        <h1>Stock Manager</h1>
+        <h1>Stock Manager <span class="version-tag">v202606092126</span></h1>
       </div>
       <button id="btn-settings-toggle" class="icon-button" aria-label="設定">
         <i data-lucide="settings"></i>
@@ -33,19 +33,23 @@
       <div class="tab-bar">
         <button id="tab-foods" class="tab-button active">
           <i data-lucide="package"></i>
-          <span>ストック</span>
+          <span class="lang-ja">ストック</span>
+          <span class="lang-en">Stock</span>
         </button>
         <button id="tab-seasonings" class="tab-button">
           <i data-lucide="flask-conical"></i>
-          <span>調味料</span>
+          <span class="lang-ja">調味料</span>
+          <span class="lang-en">Seasonings</span>
         </button>
         <button id="tab-shopping" class="tab-button">
           <i data-lucide="shopping-cart"></i>
-          <span>買い物</span>
+          <span class="lang-ja">買い物</span>
+          <span class="lang-en">Shopping</span>
         </button>
         <button id="tab-history" class="tab-button">
           <i data-lucide="history"></i>
-          <span>履歴</span>
+          <span class="lang-ja">履歴</span>
+          <span class="lang-en">History</span>
         </button>
       </div>
 
@@ -65,32 +69,13 @@
           </div>
           <div class="filter-dropdowns">
             <select id="filter-category" aria-label="カテゴリーで絞り込み">
-              <option value="all">すべての種類</option>
-              <option value="vegetable">野菜・果物</option>
-              <option value="meat">お肉・お魚</option>
-              <option value="dairy">卵・乳製品</option>
-              <option value="staple">主食・麺類</option>
-              <option value="processed">加工・冷凍</option>
-              <option value="retort">常温・缶詰</option>
-              <option value="drink">飲料・お酒</option>
-              <option value="paper">生活消耗品</option>
-              <option value="cleaning">洗剤・お掃除</option>
-              <option value="bath">ヘア・ボディ</option>
-              <option value="medicine">衛生・健康</option>
-              <option value="other">その他・雑貨</option>
+              <!-- Dynamically populated to support localization -->
             </select>
             <select id="filter-storage" aria-label="保存方法で絞り込み">
-              <option value="all">すべての保存</option>
-              <option value="fridge">冷蔵のみ</option>
-              <option value="freezer">冷凍のみ</option>
-              <option value="room">常温のみ</option>
+              <!-- Dynamically populated -->
             </select>
             <select id="filter-sort" aria-label="並び替え">
-              <option value="expiry-asc">期限が近い順</option>
-              <option value="expiry-desc">期限が遠い順</option>
-              <option value="qty-desc">残量が多い順</option>
-              <option value="qty-asc">残量が少ない順</option>
-              <option value="added-desc">購入日が新しい順</option>
+              <!-- Dynamically populated -->
             </select>
           </div>
         </div>
@@ -104,14 +89,21 @@
       <!-- TAB 2: SEASONINGS -->
       <section id="section-seasonings" class="tab-section">
         <div class="seasonings-header">
-          <h2>調味料の残量管理</h2>
-          <p>カードをタップして残量を切り替えます</p>
+          <h2>
+            <span class="lang-ja">調味料の残量管理</span>
+            <span class="lang-en">Seasoning Inventory</span>
+          </h2>
+          <p>
+            <span class="lang-ja">カードをタップして残量を切り替えます</span>
+            <span class="lang-en">Tap cards to cycle remaining levels</span>
+          </p>
           <div class="seasoning-sort-container">
-            <label for="seasoning-sort-select">並べ替え:</label>
+            <label for="seasoning-sort-select">
+              <span class="lang-ja">並べ替え:</span>
+              <span class="lang-en">Sort:</span>
+            </label>
             <select id="seasoning-sort-select" aria-label="調味料の並び順">
-              <option value="default">標準（登録順）</option>
-              <option value="frequency">使用頻度順（タップ数）</option>
-              <option value="low-level">残量が少ない順</option>
+              <!-- Dynamically populated -->
             </select>
           </div>
         </div>
@@ -127,16 +119,26 @@
         </div>
       </section>
 
-      <!-- TAB 3: SHOPPING LIST (新規追加) -->
+      <!-- TAB 3: SHOPPING LIST -->
       <section id="section-shopping" class="tab-section">
         <div class="shopping-header">
-          <h2>買い物リスト</h2>
-          <p>必要な食材・日用品を管理します</p>
+          <h2>
+            <span class="lang-ja">買い物リスト</span>
+            <span class="lang-en">Shopping List</span>
+          </h2>
+          <p>
+            <span class="lang-ja">必要な食材・日用品を管理します</span>
+            <span class="lang-en">Manage foods & household supplies</span>
+          </p>
         </div>
         
         <!-- Smart recommendation chips -->
         <div id="shopping-recommendations" class="shopping-recommendations hidden">
-          <span class="recommendation-title"><i data-lucide="sparkles"></i> 不足の調味料:</span>
+          <span class="recommendation-title">
+            <i data-lucide="sparkles"></i>
+            <span class="lang-ja">不足の調味料:</span>
+            <span class="lang-en">Low Seasonings:</span>
+          </span>
           <div id="recommendation-chips" class="recommendation-chips">
             <!-- Dynamic seasoning quick-add chips -->
           </div>
@@ -168,18 +170,7 @@
               <option value="kg">kg</option>
             </select>
             <select id="shopping-category-select" style="flex: 1; height: 36px; padding: 6px; background: rgba(255, 255, 255, 0.4); border: 1px solid var(--card-border); border-radius: var(--border-radius-sm); outline: none; font-family: var(--font-family); font-size: 0.8rem; box-sizing: border-box;">
-              <option value="vegetable">野菜・果物</option>
-              <option value="meat">お肉・お魚</option>
-              <option value="dairy">卵・乳製品</option>
-              <option value="staple">主食・麺類</option>
-              <option value="processed">加工・冷凍</option>
-              <option value="retort">常温・缶詰</option>
-              <option value="drink">飲料・お酒</option>
-              <option value="paper">生活消耗品</option>
-              <option value="cleaning">洗剤・お掃除</option>
-              <option value="bath">ヘア・ボディ</option>
-              <option value="medicine">衛生・健康</option>
-              <option value="other" selected>その他・雑貨</option>
+              <!-- Dynamically populated -->
             </select>
           </div>
         </form>
@@ -190,35 +181,61 @@
         </div>
       </section>
 
-      <!-- TAB 4: HISTORY (新規追加) -->
+      <!-- TAB 4: HISTORY -->
       <section id="section-history" class="tab-section">
         <div class="history-title-area" style="margin-bottom: 8px;">
-          <h2>消費・廃棄の履歴</h2>
-          <button id="btn-clear-history" class="btn-danger-subtle"><i data-lucide="trash-2"></i> 履歴クリア</button>
+          <h2>
+            <span class="lang-ja">消費・廃棄の履歴</span>
+            <span class="lang-en">Usage & Waste History</span>
+          </h2>
+          <button id="btn-clear-history" class="btn-danger-subtle">
+            <i data-lucide="trash-2"></i>
+            <span class="lang-ja">履歴クリア</span>
+            <span class="lang-en">Clear History</span>
+          </button>
         </div>
         
         <!-- Statistics Dashboard Card -->
         <div class="history-stats-dashboard" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--border-radius); padding: 12px; margin-bottom: 12px; backdrop-filter: blur(var(--backdrop-blur)); -webkit-backdrop-filter: blur(var(--backdrop-blur));">
           <h3 style="font-size: 0.75rem; font-weight: 800; color: var(--accent-color); margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
             <i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i>
-            <span>廃棄・消費の分析</span>
+            <span class="lang-ja">廃棄・消費の分析</span>
+            <span class="lang-en">Waste & Consumption Analysis</span>
           </h3>
           <div class="stats-time-tabs" style="display: flex; gap: 4px; background: rgba(0,0,0,0.03); padding: 2px; border-radius: var(--border-radius-sm); margin-bottom: 10px;">
-            <button type="button" class="btn-stats-time active" data-range="week" style="flex:1; border:none; background:transparent; padding: 4px; font-size: 0.7rem; font-weight:700; font-family:var(--font-family); color:var(--text-secondary); cursor:pointer; border-radius: 3px; transition: all 0.15s;">今週</button>
-            <button type="button" class="btn-stats-time" data-range="month" style="flex:1; border:none; background:transparent; padding: 4px; font-size: 0.7rem; font-weight:700; font-family:var(--font-family); color:var(--text-secondary); cursor:pointer; border-radius: 3px; transition: all 0.15s;">今月</button>
-            <button type="button" class="btn-stats-time" data-range="year" style="flex:1; border:none; background:transparent; padding: 4px; font-size: 0.7rem; font-weight:700; font-family:var(--font-family); color:var(--text-secondary); cursor:pointer; border-radius: 3px; transition: all 0.15s;">今年</button>
+            <button type="button" class="btn-stats-time active" data-range="week" style="flex:1; border:none; background:transparent; padding: 4px; font-size: 0.7rem; font-weight:700; font-family:var(--font-family); color:var(--text-secondary); cursor:pointer; border-radius: 3px; transition: all 0.15s;">
+              <span class="lang-ja">今週</span>
+              <span class="lang-en">Week</span>
+            </button>
+            <button type="button" class="btn-stats-time" data-range="month" style="flex:1; border:none; background:transparent; padding: 4px; font-size: 0.7rem; font-weight:700; font-family:var(--font-family); color:var(--text-secondary); cursor:pointer; border-radius: 3px; transition: all 0.15s;">
+              <span class="lang-ja">今月</span>
+              <span class="lang-en">Month</span>
+            </button>
+            <button type="button" class="btn-stats-time" data-range="year" style="flex:1; border:none; background:transparent; padding: 4px; font-size: 0.7rem; font-weight:700; font-family:var(--font-family); color:var(--text-secondary); cursor:pointer; border-radius: 3px; transition: all 0.15s;">
+              <span class="lang-ja">今年</span>
+              <span class="lang-en">Year</span>
+            </button>
           </div>
           <div class="stats-summary-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; margin-bottom: 10px;">
             <div style="background: rgba(22, 101, 52, 0.05); padding: 8px 4px; border-radius: var(--border-radius-sm); border: 1px solid rgba(22, 101, 52, 0.1);">
-              <span style="font-size: 0.55rem; color: var(--text-secondary); display: block;">使い切った</span>
-              <strong id="stats-consume-count" style="font-size: 1.1rem; color: var(--alert-safe); font-weight: 800;">0</strong><span style="font-size: 0.6rem; color: var(--text-secondary);">品</span>
+              <span style="font-size: 0.55rem; color: var(--text-secondary); display: block;">
+                <span class="lang-ja">使い切った</span>
+                <span class="lang-en">Used Up</span>
+              </span>
+              <strong id="stats-consume-count" style="font-size: 1.1rem; color: var(--alert-safe); font-weight: 800;">0</strong><span style="font-size: 0.6rem; color: var(--text-secondary);"><span class="lang-ja">品</span><span class="lang-en"> items</span></span>
             </div>
             <div style="background: rgba(185, 28, 28, 0.05); padding: 8px 4px; border-radius: var(--border-radius-sm); border: 1px solid rgba(185, 28, 28, 0.1);">
-              <span style="font-size: 0.55rem; color: var(--text-secondary); display: block;">廃棄した</span>
-              <strong id="stats-discard-count" style="font-size: 1.1rem; color: var(--alert-expired); font-weight: 800;">0</strong><span style="font-size: 0.6rem; color: var(--text-secondary);">品</span>
+              <span style="font-size: 0.55rem; color: var(--text-secondary); display: block;">
+                <span class="lang-ja">廃棄した</span>
+                <span class="lang-en">Wasted</span>
+              </span>
+              <strong id="stats-discard-count" style="font-size: 1.1rem; color: var(--alert-expired); font-weight: 800;">0</strong><span style="font-size: 0.6rem; color: var(--text-secondary);"><span class="lang-ja">品</span><span class="lang-en"> items</span></span>
             </div>
             <div style="background: rgba(0, 0, 0, 0.02); padding: 8px 4px; border-radius: var(--border-radius-sm); border: 1px solid var(--card-border);">
-              <span style="font-size: 0.55rem; color: var(--text-secondary); display: block;">廃棄率</span>
+              <span style="font-size: 0.55rem; color: var(--text-secondary); display: block;">
+                <span class="lang-ja">廃棄率</span>
+                <span class="lang-en">Waste Rate</span>
+              </span>
               <strong id="stats-discard-rate" style="font-size: 1.1rem; color: var(--text-primary); font-weight: 800;">0%</strong>
             </div>
           </div>
@@ -234,13 +251,19 @@
           </div>
           <!-- Waste Category Analysis Graph -->
           <div id="stats-waste-chart-container" class="stats-waste-chart-container" style="margin-top: 10px; border-top: 1px dashed var(--card-border); padding-top: 8px; display: none;">
-            <h4 style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 8px;">廃棄の多いカテゴリー</h4>
+            <h4 style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 8px;">
+              <span class="lang-ja">廃棄の多いカテゴリー</span>
+              <span class="lang-en">Most Wasted Categories</span>
+            </h4>
             <div style="display: flex; align-items: center; gap: 12px;">
               <!-- Doughnut chart -->
               <div id="stats-pie-chart" class="stats-pie-chart" style="width: 70px; height: 70px; border-radius: 50%; background: conic-gradient(var(--card-border) 0% 100%); flex-shrink: 0; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 4px rgba(0,0,0,0.05);">
                 <!-- Inner circle to make it a doughnut chart -->
                 <div style="position: absolute; width: 44px; height: 44px; background: var(--header-bg); border-radius: 50%; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                  <span style="font-size: 0.45rem; font-weight: 700; color: var(--text-muted); line-height: 1;">廃棄率</span>
+                  <span style="font-size: 0.45rem; font-weight: 700; color: var(--text-muted); line-height: 1;">
+                    <span class="lang-ja">廃棄率</span>
+                    <span class="lang-en">Waste %</span>
+                  </span>
                   <span id="stats-pie-center-text" style="font-size: 0.7rem; font-weight: 800; color: var(--text-primary); line-height: 1.1;">0%</span>
                 </div>
               </div>
@@ -261,7 +284,7 @@
 
     </main>
 
-    <!-- FLOATING ADD BUTTON (outside scrollable area for mobile visibility) -->
+    <!-- FLOATING ADD BUTTON -->
     <button id="btn-open-add-modal" class="fab-button" aria-label="アイテム追加">
       <i data-lucide="plus"></i>
     </button>
@@ -271,13 +294,19 @@
       <div class="modal-overlay"></div>
       <div class="modal-content">
         <div class="modal-header">
-          <h2>アイテムを追加</h2>
+          <h2>
+            <span class="lang-ja" id="food-modal-title-ja">アイテムを追加</span>
+            <span class="lang-en" id="food-modal-title-en">Add Item</span>
+          </h2>
           <button id="btn-close-add-modal" class="icon-button"><i data-lucide="x"></i></button>
         </div>
         
         <form id="add-food-form">
           <div class="form-group">
-            <label for="food-name">アイテム名</label>
+            <label for="food-name">
+              <span class="lang-ja">アイテム名</span>
+              <span class="lang-en">Item Name</span>
+            </label>
             <div class="autocomplete-container">
               <input type="text" id="food-name" placeholder="キャベツ、洗濯洗剤 など..." autocomplete="off" required>
               <div id="autocomplete-suggestions" class="suggestions-box hidden"></div>
@@ -285,79 +314,77 @@
           </div>
 
           <div class="form-group">
-            <label>カテゴリ</label>
+            <label>
+              <span class="lang-ja">カテゴリ</span>
+              <span class="lang-en">Category</span>
+            </label>
             <div class="category-radio-group">
               <label class="category-radio">
                 <input type="radio" name="food-category" value="vegetable" checked>
-                <span class="radio-btn"><i data-lucide="leaf"></i>野菜・果物</span>
+                <span class="radio-btn"><i data-lucide="leaf"></i><span class="lang-ja">野菜・果物</span><span class="lang-en">Veg/Fruit</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="meat">
-                <span class="radio-btn"><i data-lucide="beef"></i>肉・魚</span>
+                <span class="radio-btn"><i data-lucide="beef"></i><span class="lang-ja">肉・魚</span><span class="lang-en">Meat/Fish</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="dairy">
-                <span class="radio-btn"><i data-lucide="egg"></i>卵・乳製品</span>
+                <span class="radio-btn"><i data-lucide="egg"></i><span class="lang-ja">卵・乳製品</span><span class="lang-en">Dairy/Eggs</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="staple">
-                <span class="radio-btn"><i data-lucide="wheat"></i>主食・麺</span>
+                <span class="radio-btn"><i data-lucide="wheat"></i><span class="lang-ja">主食・麺</span><span class="lang-en">Staple</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="processed">
-                <span class="radio-btn"><i data-lucide="cookie"></i>加工・冷凍</span>
+                <span class="radio-btn"><i data-lucide="cookie"></i><span class="lang-ja">加工・冷凍</span><span class="lang-en">Processed</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="retort">
-                <span class="radio-btn"><i data-lucide="container"></i>常温・缶詰</span>
+                <span class="radio-btn"><i data-lucide="container"></i><span class="lang-ja">常温・缶詰</span><span class="lang-en">Pantry</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="drink">
-                <span class="radio-btn"><i data-lucide="cup-soda"></i>飲料・酒</span>
+                <span class="radio-btn"><i data-lucide="cup-soda"></i><span class="lang-ja">飲料・酒</span><span class="lang-en">Beverage</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="paper">
-                <span class="radio-btn"><i data-lucide="sticky-note"></i>消耗品</span>
+                <span class="radio-btn"><i data-lucide="sticky-note"></i><span class="lang-ja">消耗品</span><span class="lang-en">Household</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="cleaning">
-                <span class="radio-btn"><i data-lucide="sparkles"></i>洗剤・掃除</span>
+                <span class="radio-btn"><i data-lucide="sparkles"></i><span class="lang-ja">洗剤・掃除</span><span class="lang-en">Cleaning</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="bath">
-                <span class="radio-btn"><i data-lucide="bath"></i>ヘアボディ</span>
+                <span class="radio-btn"><i data-lucide="bath"></i><span class="lang-ja">ヘアボディ</span><span class="lang-en">Bath/Body</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="medicine">
-                <span class="radio-btn"><i data-lucide="pill"></i>衛生健康</span>
+                <span class="radio-btn"><i data-lucide="pill"></i><span class="lang-ja">衛生健康</span><span class="lang-en">Health</span></span>
               </label>
               <label class="category-radio">
                 <input type="radio" name="food-category" value="other">
-                <span class="radio-btn"><i data-lucide="box"></i>その他雑貨</span>
+                <span class="radio-btn"><i data-lucide="box"></i><span class="lang-ja">その他雑貨</span><span class="lang-en">Other</span></span>
               </label>
             </div>
           </div>
 
           <div class="form-row-split" style="margin-bottom: 4px;">
             <div class="form-group flex-1" style="margin-bottom: 0;">
-              <label for="food-initial-amount">購入量</label>
+              <label for="food-initial-amount">
+                <span class="lang-ja">購入量</span>
+                <span class="lang-en">Quantity</span>
+              </label>
               <input type="number" id="food-initial-amount" placeholder="1" min="0" step="any" required>
             </div>
             <div class="form-group flex-1" style="margin-bottom: 0;">
-              <label for="food-unit">単位</label>
+              <label for="food-unit">
+                <span class="lang-ja">単位</span>
+                <span class="lang-en">Unit</span>
+              </label>
               <select id="food-unit-select">
-                <option value="個">個</option>
-                <option value="g">g (グラム)</option>
-                <option value="ml">ml (ミリリットル)</option>
-                <option value="パック">パック</option>
-                <option value="袋">袋</option>
-                <option value="枚">枚</option>
-                <option value="本">本</option>
-                <option value="束">束</option>
-                <option value="食">食</option>
-                <option value="缶">缶</option>
-                <option value="kg">kg</option>
-                <option value="L">L (リットル)</option>
+                <!-- Dynamically populated -->
               </select>
             </div>
           </div>
@@ -365,21 +392,23 @@
             <!-- Dynamically populated buttons depending on unit -->
           </div>
 
-
           <div class="form-group">
-            <label>保存方法</label>
+            <label>
+              <span class="lang-ja">保存方法</span>
+              <span class="lang-en">Storage</span>
+            </label>
             <div class="storage-radio-group">
               <label class="storage-radio">
                 <input type="radio" name="food-storage" value="fridge" checked>
-                <span class="radio-btn-pill"><i data-lucide="thermometer"></i>冷蔵保存</span>
+                <span class="radio-btn-pill"><i data-lucide="thermometer"></i><span class="lang-ja">冷蔵保存</span><span class="lang-en">Fridge</span></span>
               </label>
               <label class="storage-radio">
                 <input type="radio" name="food-storage" value="freezer">
-                <span class="radio-btn-pill"><i data-lucide="snowflake"></i>冷凍保存</span>
+                <span class="radio-btn-pill"><i data-lucide="snowflake"></i><span class="lang-ja">冷凍保存</span><span class="lang-en">Freezer</span></span>
               </label>
               <label class="storage-radio">
                 <input type="radio" name="food-storage" value="room">
-                <span class="radio-btn-pill"><i data-lucide="box"></i>常温保存</span>
+                <span class="radio-btn-pill"><i data-lucide="box"></i><span class="lang-ja">常温保存</span><span class="lang-en">Room Temp</span></span>
               </label>
             </div>
           </div>
@@ -387,7 +416,10 @@
           <div class="form-row-split-dates" style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px;">
             <!-- Purchase Date Section (40% width) -->
             <div class="form-group" style="width: 40%; margin-bottom: 0;">
-              <label for="food-purchase-date">購入日</label>
+              <label for="food-purchase-date">
+                <span class="lang-ja">購入日</span>
+                <span class="lang-en">Purchase Date</span>
+              </label>
               <input type="date" id="food-purchase-date" required>
               <div class="purchase-helper-buttons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px;">
                 <button type="button" class="btn-subtle" id="btn-purchase-prev" style="padding: 4px 0; color: var(--alert-expired);">-1日</button>
@@ -396,29 +428,38 @@
             </div>
             <!-- Expiry Date Section (60% width) -->
             <div class="form-group" style="width: 60%; margin-bottom: 0;">
-              <label for="food-expiry">賞味期限（任意）</label>
+              <label for="food-expiry">
+                <span class="lang-ja">賞味期限（任意）</span>
+                <span class="lang-en">Expiry (Optional)</span>
+              </label>
               <input type="date" id="food-expiry">
               
               <!-- Calculated suggested date banner -->
               <div id="suggested-expiry-badge" class="suggested-expiry-badge hidden" style="padding: 2px 6px; font-size: 0.65rem; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed var(--accent-color); border-radius: var(--border-radius-sm); background: var(--card-bg);">
-                <span style="font-size:0.6rem;">💡目安: <strong id="suggested-expiry-date">2026/06/15</strong></span>
-                <button type="button" id="btn-apply-suggested-expiry" class="btn-mini" style="font-size:0.55rem; padding: 2px 4px;">適用</button>
+                <span style="font-size:0.6rem;">💡<span class="lang-ja">目安: </span><span class="lang-en">Est: </span><strong id="suggested-expiry-date">2026/06/15</strong></span>
+                <button type="button" id="btn-apply-suggested-expiry" class="btn-mini" style="font-size:0.55rem; padding: 2px 4px;">
+                  <span class="lang-ja">適用</span>
+                  <span class="lang-en">Apply</span>
+                </button>
               </div>
 
               <div class="quick-expiry-buttons">
-                <button type="button" class="btn-subtle" data-days="-1" style="color: var(--alert-expired);">-1日</button>
-                <button type="button" class="btn-subtle" data-days="1">+1日</button>
-                <button type="button" class="btn-subtle" data-days="3">+3日</button>
-                <button type="button" class="btn-subtle" data-days="7">+7日</button>
-                <button type="button" class="btn-subtle" data-days="14">+14日</button>
-                <button type="button" class="btn-subtle" data-days="30">+1ヶ月</button>
-                <button type="button" class="btn-subtle" id="btn-clear-expiry">なし</button>
+                <button type="button" class="btn-subtle" data-days="-1" style="color: var(--alert-expired);"><span class="lang-ja">-1日</span><span class="lang-en">-1d</span></button>
+                <button type="button" class="btn-subtle" data-days="1"><span class="lang-ja">+1日</span><span class="lang-en">+1d</span></button>
+                <button type="button" class="btn-subtle" data-days="3"><span class="lang-ja">+3日</span><span class="lang-en">+3d</span></button>
+                <button type="button" class="btn-subtle" data-days="7"><span class="lang-ja">+7日</span><span class="lang-en">+7d</span></button>
+                <button type="button" class="btn-subtle" data-days="14"><span class="lang-ja">+14日</span><span class="lang-en">+14d</span></button>
+                <button type="button" class="btn-subtle" data-days="30"><span class="lang-ja">+1ヶ月</span><span class="lang-en">+1m</span></button>
+                <button type="button" class="btn-subtle" id="btn-clear-expiry"><span class="lang-ja">なし</span><span class="lang-en">None</span></button>
               </div>
 
             </div>
           </div>
 
-          <button type="submit" class="btn-primary" style="margin-top: 12px;">追加する</button>
+          <button type="submit" class="btn-primary" style="margin-top: 12px;">
+            <span class="lang-ja" id="btn-food-submit-ja">追加する</span>
+            <span class="lang-en" id="btn-food-submit-en">Add Item</span>
+          </button>
         </form>
       </div>
     </div>
@@ -428,38 +469,56 @@
       <div class="modal-overlay"></div>
       <div class="modal-content">
         <div class="modal-header">
-          <h2>設定・データ管理</h2>
+          <h2>
+            <span class="lang-ja">設定・データ管理</span>
+            <span class="lang-en">Settings & Data</span>
+          </h2>
           <button id="btn-close-settings-modal" class="icon-button"><i data-lucide="x"></i></button>
         </div>
         
         <div class="settings-body">
+          <!-- LANGUAGE SELECTOR -->
+          <div class="settings-section">
+            <h3>
+              <span class="lang-ja">表示言語</span>
+              <span class="lang-en">Display Language</span>
+            </h3>
+            <select id="setting-language" class="btn-action" style="width: 100%; text-align: left; padding-left: 12px; height: 38px;">
+              <option value="ja">日本語 (Japanese)</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+
           <!-- THEME SELECTOR -->
           <div class="settings-section">
-            <h3>デザインテーマ</h3>
+            <h3>
+              <span class="lang-ja">デザインテーマ</span>
+              <span class="lang-en">App Theme</span>
+            </h3>
             <div class="theme-selector-grid">
               <button class="theme-option" data-theme-val="organic">
                 <div class="theme-preview organic"></div>
-                <span>オーガニック</span>
+                <span><span class="lang-ja">オーガニック</span><span class="lang-en">Organic</span></span>
               </button>
               <button class="theme-option" data-theme-val="honey">
                 <div class="theme-preview honey"></div>
-                <span>ハニー</span>
+                <span><span class="lang-ja">ハニー</span><span class="lang-en">Honey</span></span>
               </button>
               <button class="theme-option" data-theme-val="mint">
                 <div class="theme-preview mint"></div>
-                <span>ミント</span>
+                <span><span class="lang-ja">ミント</span><span class="lang-en">Mint</span></span>
               </button>
               <button class="theme-option" data-theme-val="berry">
                 <div class="theme-preview berry"></div>
-                <span>ベリー</span>
+                <span><span class="lang-ja">ベリー</span><span class="lang-en">Berry</span></span>
               </button>
               <button class="theme-option" data-theme-val="light">
                 <div class="theme-preview light"></div>
-                <span>ライト</span>
+                <span><span class="lang-ja">ライト</span><span class="lang-en">Light</span></span>
               </button>
               <button class="theme-option" data-theme-val="dark">
                 <div class="theme-preview dark"></div>
-                <span>ダーク</span>
+                <span><span class="lang-ja">ダーク</span><span class="lang-en">Dark</span></span>
               </button>
             </div>
 
@@ -467,35 +526,47 @@
 
           <!-- CYCLE STEP SELECTOR -->
           <div class="settings-section">
-            <h3>残量の減少ステップ</h3>
-            <p class="section-desc">アイテムをタップした際に減少するパーセンテージを指定します。</p>
+            <h3>
+              <span class="lang-ja">残量の減少ステップ</span>
+              <span class="lang-en">Quantity Decrement Step</span>
+            </h3>
+            <p class="section-desc">
+              <span class="lang-ja">アイテムをタップした際に減少するパーセンテージを指定します。</span>
+              <span class="lang-en">Specify the percentage to decrease when tapping an item.</span>
+            </p>
             <select id="setting-qty-step" class="btn-action" style="width: 100%; text-align: left; padding-left: 12px;">
-              <option value="10">10% ずつ減少 (100➔90➔80...➔0%)</option>
-              <option value="20">20% ずつ減少 (100➔80➔60➔40➔20➔0%)</option>
-              <option value="25">25% ずつ減少 (100➔75➔50➔25➔0%)</option>
-              <option value="50">50% ずつ減少 (100➔50➔0%)</option>
+              <!-- Dynamically populated -->
             </select>
           </div>
 
           <!-- BACKUP & RESTORE -->
           <div class="settings-section">
-            <h3>データのバックアップと移行</h3>
-            <p class="section-desc">機種変更やデータ保存の際にご利用ください。</p>
+            <h3>
+              <span class="lang-ja">データのバックアップと移行</span>
+              <span class="lang-en">Data Backup & Migration</span>
+            </h3>
+            <p class="section-desc">
+              <span class="lang-ja">機種変更やデータ保存の際にご利用ください。</span>
+              <span class="lang-en">Use this for data transfer or backups.</span>
+            </p>
             
             <div class="backup-actions">
               <button id="btn-export-json" class="btn-action">
                 <i data-lucide="download"></i>
-                <span>JSONバックアップ (完全復元用)</span>
+                <span class="lang-ja">JSONバックアップ (完全復元用)</span>
+                <span class="lang-en">JSON Backup (Full Restore)</span>
               </button>
               <button id="btn-export-csv" class="btn-action">
                 <i data-lucide="file-spreadsheet"></i>
-                <span>CSVエクスポート (閲覧・Excel用)</span>
+                <span class="lang-ja">CSVエクスポート (閲覧・Excel用)</span>
+                <span class="lang-en">Export CSV (Excel View)</span>
               </button>
               
               <div class="import-area">
                 <label for="import-json-file" class="btn-action btn-outline">
                   <i data-lucide="upload"></i>
-                  <span>JSONバックアップから復元</span>
+                  <span class="lang-ja">JSONバックアップから復元</span>
+                  <span class="lang-en">Restore from JSON Backup</span>
                 </label>
                 <input type="file" id="import-json-file" accept=".json" style="display: none;">
               </div>
@@ -504,19 +575,27 @@
 
           <!-- HELP / HOW TO USE -->
           <div class="settings-section">
-            <h3>アプリの使い方・ヘルプ</h3>
+            <h3>
+              <span class="lang-ja">アプリの使い方・ヘルプ</span>
+              <span class="lang-en">App Help & Tutorial</span>
+            </h3>
             <button id="btn-open-help" class="btn-action" style="background: var(--accent-bg); color: #ffffff; font-weight: 700; width: 100%; border: none;">
               <i data-lucide="help-circle" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
-              <span>使い方・ヘルプを開く</span>
+              <span class="lang-ja">使い方・ヘルプを開く</span>
+              <span class="lang-en">Open Help & Tutorial</span>
             </button>
           </div>
 
           <!-- RESET DATA -->
           <div class="settings-section">
-            <h3>初期化</h3>
+            <h3>
+              <span class="lang-ja">初期化</span>
+              <span class="lang-en">Reset Data</span>
+            </h3>
             <button id="btn-reset-data" class="btn-danger">
               <i data-lucide="trash-2"></i>
-              <span>全データを初期化</span>
+              <span class="lang-ja">全データを初期化</span>
+              <span class="lang-en">Reset All Data</span>
             </button>
           </div>
         </div>
@@ -528,38 +607,49 @@
       <div class="modal-overlay"></div>
       <div class="modal-content">
         <div class="modal-header">
-          <h2>調味料を編集</h2>
+          <h2>
+            <span class="lang-ja">調味料を編集</span>
+            <span class="lang-en">Edit Seasoning</span>
+          </h2>
           <button id="btn-close-edit-seasoning-modal" class="icon-button"><i data-lucide="x"></i></button>
         </div>
         
         <form id="edit-seasoning-form">
           <div class="form-group">
-            <label for="edit-seasoning-name">調味料名</label>
+            <label for="edit-seasoning-name">
+              <span class="lang-ja">調味料名</span>
+              <span class="lang-en">Seasoning Name</span>
+            </label>
             <input type="text" id="edit-seasoning-name" placeholder="マヨネーズ など..." autocomplete="off" required>
           </div>
 
           <div class="form-group">
-            <label for="edit-seasoning-color">テーマカラー</label>
+            <label for="edit-seasoning-color">
+              <span class="lang-ja">テーマカラー</span>
+              <span class="lang-en">Theme Color</span>
+            </label>
             <input type="color" id="edit-seasoning-color" value="#a8a29e">
           </div>
 
           <div class="form-group">
-            <label for="edit-seasoning-level">残量</label>
+            <label for="edit-seasoning-level">
+              <span class="lang-ja">残量</span>
+              <span class="lang-en">Remaining Level</span>
+            </label>
             <select id="edit-seasoning-level">
-              <option value="full">100% (いっぱい)</option>
-              <option value="high">80%</option>
-              <option value="medium">60%</option>
-              <option value="low">40%</option>
-              <option value="very-low">20%</option>
-              <option value="empty">0% (空)</option>
+              <!-- Dynamically populated -->
             </select>
           </div>
 
           <div style="display: flex; gap: 10px; margin-top: 16px;">
-            <button type="submit" class="btn-primary" style="flex: 2;">保存する</button>
+            <button type="submit" class="btn-primary" style="flex: 2;">
+              <span class="lang-ja">保存する</span>
+              <span class="lang-en">Save</span>
+            </button>
             <button type="button" id="btn-delete-seasoning" class="btn-danger" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 0; box-sizing: border-box; height: 38px;">
               <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-              <span>削除</span>
+              <span class="lang-ja">削除</span>
+              <span class="lang-en">Delete</span>
             </button>
           </div>
         </form>
@@ -571,23 +661,35 @@
       <div class="modal-overlay"></div>
       <div class="modal-content">
         <div class="modal-header">
-          <h2>買い物アイテムを編集</h2>
+          <h2>
+            <span class="lang-ja">買い物アイテムを編集</span>
+            <span class="lang-en">Edit Shopping Item</span>
+          </h2>
           <button id="btn-close-edit-shopping-modal" class="icon-button"><i data-lucide="x"></i></button>
         </div>
         
         <form id="edit-shopping-form">
           <div class="form-group">
-            <label for="edit-shopping-name">アイテム名</label>
+            <label for="edit-shopping-name">
+              <span class="lang-ja">アイテム名</span>
+              <span class="lang-en">Item Name</span>
+            </label>
             <input type="text" id="edit-shopping-name" placeholder="買うものを入力..." required>
           </div>
 
           <div class="form-row-split" style="margin-bottom: 12px;">
             <div class="form-group flex-1" style="margin-bottom: 0;">
-              <label for="edit-shopping-qty">数量</label>
+              <label for="edit-shopping-qty">
+                <span class="lang-ja">数量</span>
+                <span class="lang-en">Quantity</span>
+              </label>
               <input type="number" id="edit-shopping-qty" placeholder="1" min="0.1" step="any" required>
             </div>
             <div class="form-group flex-1" style="margin-bottom: 0;">
-              <label for="edit-shopping-unit">単位</label>
+              <label for="edit-shopping-unit">
+                <span class="lang-ja">単位</span>
+                <span class="lang-en">Unit</span>
+              </label>
               <select id="edit-shopping-unit">
                 <option value="個">個</option>
                 <option value="パック">パック</option>
@@ -604,24 +706,19 @@
           </div>
 
           <div class="form-group">
-            <label for="edit-shopping-category">カテゴリ</label>
+            <label for="edit-shopping-category">
+              <span class="lang-ja">カテゴリ</span>
+              <span class="lang-en">Category</span>
+            </label>
             <select id="edit-shopping-category">
-              <option value="vegetable">野菜・果物</option>
-              <option value="meat">お肉・お魚</option>
-              <option value="dairy">卵・乳製品</option>
-              <option value="staple">主食・麺類</option>
-              <option value="processed">加工・冷凍</option>
-              <option value="retort">常温・缶詰</option>
-              <option value="drink">飲料・お酒</option>
-              <option value="paper">生活消耗品</option>
-              <option value="cleaning">洗剤・お掃除</option>
-              <option value="bath">ヘア・ボディ</option>
-              <option value="medicine">衛生・健康</option>
-              <option value="other">その他・雑貨</option>
+              <!-- Dynamically populated -->
             </select>
           </div>
 
-          <button type="submit" class="btn-primary" style="margin-top: 16px;">保存する</button>
+          <button type="submit" class="btn-primary" style="margin-top: 16px;">
+            <span class="lang-ja">保存する</span>
+            <span class="lang-en">Save</span>
+          </button>
         </form>
       </div>
     </div>
@@ -631,93 +728,173 @@
       <div class="modal-overlay"></div>
       <div class="modal-content" style="max-height: 80vh; display: flex; flex-direction: column;">
         <div class="modal-header">
-          <h2>使い方・ヘルプ</h2>
+          <h2>
+            <span class="lang-ja">使い方・ヘルプ</span>
+            <span class="lang-en">App Help & Tutorial</span>
+          </h2>
           <button id="btn-close-help-modal" class="icon-button"><i data-lucide="x"></i></button>
         </div>
         <div class="help-modal-body" style="overflow-y: auto; flex: 1; padding-bottom: 16px; font-size: 0.75rem; line-height: 1.5; color: var(--text-primary);">
-          <div class="help-section" style="margin-bottom: 12px;">
-            <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-              <i data-lucide="package" style="width: 14px; height: 14px;"></i>
-              <span>Stock Manager について</span>
-            </h3>
-            <p>本アプリは、食材だけでなくトイレットペーパーなどの日用品や掃除用の洗剤など、生活に必要なあらゆる「ストック」を一元管理して無駄遣い・フードロスを防止するためのアプリです。</p>
-          </div>
           
-          <div class="help-section" style="margin-bottom: 12px;">
-            <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-              <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i>
-              <span>1. ストックの登録</span>
-            </h3>
-            <p>右下のプラスボタンからストックを追加できます。</p>
-            <ul style="margin-left: 14px; margin-top: 4px;">
-              <li><strong>名前の自動入力サポート</strong>: 文字を入力すると、よくあるストックのカテゴリや保存方法（冷蔵・冷凍・常温）を自動で判別してセットします。</li>
-              <li><strong>分量の簡単追加</strong>: 「購入量」と「単位」を指定すると、その直下に加算・減算ボタン（`+100`や`-50`など）が自動生成され、タップするだけで数値が入力できます。</li>
-              <li><strong>賞味期限の累積計算</strong>: 期限の下の `[+3日]` や `[+7日]` を押すと、現在の設定値に対して日数を累積して加算できます。`[なし]` を押すと期限を設定しません（日用品など）。</li>
-            </ul>
+          <!-- JAPANESE HELP -->
+          <div class="lang-ja">
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="package" style="width: 14px; height: 14px;"></i>
+                <span>Stock Manager について</span>
+              </h3>
+              <p>本アプリは、食材だけでなくトイレットペーパーなどの日用品や掃除用の洗剤など、生活に必要なあらゆる「ストック」を一元管理して無駄遣い・フードロスを防止するためのアプリです。</p>
+            </div>
+            
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i>
+                <span>1. ストックの登録</span>
+              </h3>
+              <p>右下のプラスボタンからストックを追加できます。</p>
+              <ul style="margin-left: 14px; margin-top: 4px;">
+                <li><strong>名前の自動入力サポート</strong>: 文字を入力すると、よくあるストックのカテゴリや保存方法（冷蔵・冷凍・常温）を自動で判別してセットします。</li>
+                <li><strong>分量の簡単追加</strong>: 「購入量」と「単位」を指定すると、その直下に加算・減算ボタン（`+100`や`-50`など）が自動生成され、タップするだけで数値が入力できます。</li>
+                <li><strong>賞味期限の累積計算</strong>: 期限の下の `[+3日]` や `[+7日]` を押すと、現在の設定値に対して日数を累積して加算できます。`[なし]` を押すと期限を設定しません（日用品など）。</li>
+              </ul>
+            </div>
+
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="percent" style="width: 14px; height: 14px;"></i>
+                <span>2. 残量の変更と消費・廃棄の記録</span>
+              </h3>
+              <p>ストックリストに並んでいるアイテムの「残量ボタン（例: 100%）」をタップすると、設定で指定したステップ（例: 25%ずつ）残量が減少します。</p>
+              <ul style="margin-left: 14px; margin-top: 4px;">
+                <li>残量が <strong>0%</strong> になるか、<strong>ゴミ箱ボタン</strong> を押すと、確認画面が表示されます。</li>
+                <li>アイテムを使い切った場合は<strong>「使い切った（消費）」</strong>、廃棄した場合は<strong>「廃棄した（処分）」</strong>を選択してください。自動的に履歴タブに記録されます。</li>
+              </ul>
+            </div>
+
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="shopping-cart" style="width: 14px; height: 14px;"></i>
+                <span>3. 買い物リスト</span>
+              </h3>
+              <p>切らしたアイテムをメモできるチェックリストです。カテゴリごとに美しく整理されます。</p>
+              <ul style="margin-left: 14px; margin-top: 4px;">
+                <li><strong>調味料の自動推薦</strong>: 在庫切れや残量が少ない調味料がある場合、「不足の調味料」として買い足し提案チップが表示され、ワンタップでリストに追加できます。</li>
+                <li><strong>チェックで在庫登録</strong>: リスト左側のチェック丸ボタンをタップすると、そのアイテムの情報（単位や保存場所）が自動入力された状態で登録モーダルが開き、そのまま在庫へ追加できます。</li>
+              </ul>
+            </div>
+
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i>
+                <span>4. 履歴と廃棄分析</span>
+              </h3>
+              <p>履歴タブでは、過去に「消費」「廃棄」した全アイテムが確認できます。</p>
+              <ul style="margin-left: 14px; margin-top: 4px;">
+                <li>「今週」「今月」「今年」のタブで期間を切り替え、廃棄率（%）とエコ進捗を管理できます。</li>
+                <li>廃棄したアイテムのカテゴリ分布が<strong>廃棄分析グラフ（シェアメーター）</strong>で自動集計され、どのストックが無駄になっているかひと目で分かります。</li>
+              </ul>
+            </div>
           </div>
 
-          <div class="help-section" style="margin-bottom: 12px;">
-            <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-              <i data-lucide="percent" style="width: 14px; height: 14px;"></i>
-              <span>2. 残量の変更と消費・廃棄の記録</span>
-            </h3>
-            <p>ストックリストに並んでいるアイテムの「残量ボタン（例: 100%）」をタップすると、設定で指定したステップ（例: 25%ずつ）残量が減少します。</p>
-            <ul style="margin-left: 14px; margin-top: 4px;">
-              <li>残量が <strong>0%</strong> になるか、<strong>ゴミ箱ボタン</strong> を押すと、確認画面が表示されます。</li>
-              <li>アイテムを使い切った場合は<strong>「使い切った（消費）」</strong>、廃棄した場合は<strong>「廃棄した（処分）」</strong>を選択してください。自動的に履歴タブに記録されます。</li>
-            </ul>
-          </div>
+          <!-- ENGLISH HELP -->
+          <div class="lang-en">
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="package" style="width: 14px; height: 14px;"></i>
+                <span>About Stock Manager</span>
+              </h3>
+              <p>This app helps you manage all kinds of "stock" needed for daily life—not only foods but also household items like toilet paper and cleaning detergents—to prevent waste and food loss.</p>
+            </div>
+            
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i>
+                <span>1. Registering Stock</span>
+              </h3>
+              <p>You can add items using the plus button in the bottom right corner.</p>
+              <ul style="margin-left: 14px; margin-top: 4px;">
+                <li><strong>Autocomplete Support</strong>: Typing a name will automatically detect and preset common item categories and storage methods (fridge, freezer, room temp).</li>
+                <li><strong>Easy Quantity Input</strong>: Specifying a quantity and unit generates helper buttons (like `+100` or `-50`) directly below for easy clicking.</li>
+                <li><strong>Cumulative Expiry Calculator</strong>: Clicking `[+3d]` or `[+7d]` below the date input adds days cumulatively to the date. Clicking `[None]` removes the expiry date (e.g. for household items).</li>
+              </ul>
+            </div>
 
-          <div class="help-section" style="margin-bottom: 12px;">
-            <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-              <i data-lucide="shopping-cart" style="width: 14px; height: 14px;"></i>
-              <span>3. 買い物リスト</span>
-            </h3>
-            <p>切らしたアイテムをメモできるチェックリストです。カテゴリごとに美しく整理されます。</p>
-            <ul style="margin-left: 14px; margin-top: 4px;">
-              <li><strong>調味料の自動推薦</strong>: 在庫切れや残量が少ない調味料がある場合、「不足の調味料」として買い足し提案チップが表示され、ワンタップでリストに追加できます。</li>
-              <li><strong>チェックで在庫登録</strong>: リスト左側のチェック丸ボタンをタップすると、そのアイテムの情報（単位や保存場所）が自動入力された状態で登録モーダルが開き、そのまま在庫へ追加できます。</li>
-            </ul>
-          </div>
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="percent" style="width: 14px; height: 14px;"></i>
+                <span>2. Tracking Quantity & Waste</span>
+              </h3>
+              <p>Tapping the quantity button (e.g., 100%) on items in the stock list decreases it by the step specified in settings (e.g., 25%).</p>
+              <ul style="margin-left: 14px; margin-top: 4px;">
+                <li>When the quantity reaches <strong>0%</strong> or when you click the <strong>trash button</strong>, a confirmation dialog appears.</li>
+                <li>Select <strong>"Used Up (Consumed)"</strong> if used, or <strong>"Wasted (Discarded)"</strong> if thrown away. It will be logged under the History tab.</li>
+              </ul>
+            </div>
 
-          <div class="help-section" style="margin-bottom: 12px;">
-            <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-              <i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i>
-              <span>4. 履歴と廃棄分析</span>
-            </h3>
-            <p>履歴タブでは、過去に「消費」「廃棄」した全アイテムが確認できます。</p>
-            <ul style="margin-left: 14px; margin-top: 4px;">
-              <li>「今週」「今月」「今年」のタブで期間を切り替え、廃棄率（%）とエコ進捗を管理できます。</li>
-              <li>廃棄したアイテムのカテゴリ分布が<strong>廃棄分析グラフ（シェアメーター）</strong>で自動集計され、どのストックが無駄になっているかひと目で分かります。</li>
-            </ul>
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="shopping-cart" style="width: 14px; height: 14px;"></i>
+                <span>3. Shopping List</span>
+              </h3>
+              <p>A checklist for items you run out of. They are beautifully organized by category.</p>
+              <ul style="margin-left: 14px; margin-top: 4px;">
+                <li><strong>Automatic Seasoning Suggestions</strong>: If any seasonings are empty or low, quick-add chips appear to add them to your list with a single tap.</li>
+                <li><strong>Add to Stock on Check</strong>: Tapping the check circle button on the left of an item opens the add stock modal pre-filled with its unit and storage, allowing you to add it directly to stock.</li>
+              </ul>
+            </div>
+
+            <div class="help-section" style="margin-bottom: 12px;">
+              <h3 style="font-size: 0.85rem; font-weight: 800; color: var(--accent-color); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="bar-chart-3" style="width: 14px; height: 14px;"></i>
+                <span>4. History & Waste Analysis</span>
+              </h3>
+              <p>In the History tab, you can view all past consumed or wasted items.</p>
+              <ul style="margin-left: 14px; margin-top: 4px;">
+                <li>Switch between <strong>"Week"</strong>, <strong>"Month"</strong>, and <strong>"Year"</strong> tabs to monitor your waste rate (%) and eco progress.</li>
+                <li>The categories of wasted items are compiled into a visual breakdown chart, showing you at a glance which items are going to waste.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-
-    <!-- ACTION CONFIRMATION MODAL (新規追加) -->
+    <!-- ACTION CONFIRMATION MODAL -->
     <div id="confirm-action-modal" class="modal">
       <div class="modal-overlay"></div>
       <div class="modal-content" style="padding-bottom: 24px;">
         <div class="modal-header">
-          <h2>食材の記録</h2>
+          <h2>
+            <span class="lang-ja">食材の記録</span>
+            <span class="lang-en">Record Usage</span>
+          </h2>
           <button id="btn-close-confirm-modal" class="icon-button"><i data-lucide="x"></i></button>
         </div>
         <div class="confirm-modal-body">
-          <p class="confirm-modal-text">「<span id="confirm-food-name" style="font-weight: 800; color: var(--accent-color);">キャベツ</span>」をどのように処理しましたか？</p>
-          <p class="confirm-modal-subtext" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 16px;">アクションを選ぶと履歴に記録されます。</p>
+          <p class="confirm-modal-text">
+            <span class="lang-ja">「<span id="confirm-food-name" style="font-weight: 800; color: var(--accent-color);">キャベツ</span>」をどのように処理しましたか？</span>
+            <span class="lang-en">How did you handle "<span id="confirm-food-name-en" style="font-weight: 800; color: var(--accent-color);">Cabbage</span>"?</span>
+          </p>
+          <p class="confirm-modal-subtext" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 16px;">
+            <span class="lang-ja">アクションを選ぶと履歴に記録されます。</span>
+            <span class="lang-en">Selecting an action will log it in history.</span>
+          </p>
           <div class="confirm-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
             <button id="btn-action-consume" class="btn-action-choice consume" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: var(--border-radius-sm); border: 1px solid rgba(22,101,52,0.2); background: rgba(22,101,52,0.06); color: var(--alert-safe); cursor: pointer; font-family: var(--font-family); font-weight: 700; font-size: 0.85rem;">
               <i data-lucide="check-circle-2" style="width: 22px; height: 22px;"></i>
-              <span>使い切った (消費)</span>
+              <span class="lang-ja">使い切った (消費)</span>
+              <span class="lang-en">Used Up (Consumed)</span>
             </button>
             <button id="btn-action-discard" class="btn-action-choice discard" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: var(--border-radius-sm); border: 1px solid rgba(185,28,28,0.2); background: rgba(185,28,28,0.06); color: var(--alert-expired); cursor: pointer; font-family: var(--font-family); font-weight: 700; font-size: 0.85rem;">
               <i data-lucide="alert-triangle" style="width: 22px; height: 22px;"></i>
-              <span>廃棄した (処分)</span>
+              <span class="lang-ja">廃棄した (処分)</span>
+              <span class="lang-en">Wasted (Discarded)</span>
             </button>
           </div>
-          <button id="btn-action-cancel" class="btn-primary" style="background: rgba(0,0,0,0.03); color: var(--text-primary); border: 1px solid var(--card-border); font-weight: 700;">キャンセル</button>
+          <button id="btn-action-cancel" class="btn-primary" style="background: rgba(0,0,0,0.03); color: var(--text-primary); border: 1px solid var(--card-border); font-weight: 700;">
+            <span class="lang-ja">キャンセル</span>
+            <span class="lang-en">Cancel</span>
+          </button>
         </div>
       </div>
     </div>

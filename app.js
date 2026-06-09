@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     shopping: [],
     history: [],
     theme: 'organic',
-    qtyStep: 25
+    qtyStep: 25,
+    language: 'ja'
   };
 
   // Temporary variable to track default days, amount and unit for current autocomplete selection
@@ -156,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const helpModal = document.getElementById('help-modal');
   const btnOpenHelp = document.getElementById('btn-open-help');
   const btnCloseHelpModal = document.getElementById('btn-close-help-modal');
+  const settingLanguage = document.getElementById('setting-language');
 
 
   // Safe helper to call Lucide icon generator (protects against offline CDN load failure)
@@ -171,8 +173,225 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- LOCALIZATION / TRANSLATIONS ---
+  function getSeasoningDisplayName(seasoning, lang) {
+    if (lang === 'en') {
+      const enNames = {
+        sugar: 'Sugar', salt: 'Salt', vinegar: 'Vinegar', soy_sauce: 'Soy Sauce', miso: 'Miso',
+        mirin: 'Mirin', sake: 'Cooking Sake', oil: 'Cooking Oil', olive_oil: 'Olive Oil', mentsuyu: 'Mentsuyu',
+        mayo: 'Mayonnaise', ketchup: 'Ketchup', wasabi: 'Wasabi', karashi: 'Mustard', garlic: 'Garlic Tube', ginger: 'Ginger Tube'
+      };
+      const defaults = window.DEFAULT_SEASONINGS ? window.DEFAULT_SEASONINGS.find(d => d.id === seasoning.id) : null;
+      if (defaults && seasoning.name === defaults.name) {
+        return enNames[seasoning.id] || seasoning.name;
+      }
+    }
+    return seasoning.name;
+  }
+
+  function updateLocalizedSelects() {
+    const lang = state.language || 'ja';
+    
+    if (filterCategory) {
+      const currentVal = filterCategory.value;
+      const categories = [
+        { val: 'all', ja: 'すべての種類', en: 'All Categories' },
+        { val: 'vegetable', ja: '野菜・果物', en: 'Vegetables & Fruits' },
+        { val: 'meat', ja: 'お肉・お魚', en: 'Meat & Fish' },
+        { val: 'dairy', ja: '卵・乳製品', en: 'Dairy & Eggs' },
+        { val: 'staple', ja: '主食・麺類', en: 'Staples & Noodles' },
+        { val: 'processed', ja: '加工・冷凍', en: 'Processed & Frozen' },
+        { val: 'retort', ja: '常温・缶詰', en: 'Pantry & Canned' },
+        { val: 'drink', ja: '飲料・お酒', en: 'Beverages & Alcohol' },
+        { val: 'paper', ja: '生活消耗品', en: 'Household Supplies' },
+        { val: 'cleaning', ja: '洗剤・お掃除', en: 'Detergents & Cleaning' },
+        { val: 'bath', ja: 'ヘア・ボディ', en: 'Hair & Body Care' },
+        { val: 'medicine', ja: '衛生・健康', en: 'Hygiene & Health' },
+        { val: 'other', ja: 'その他・雑貨', en: 'Others & Misc' }
+      ];
+      filterCategory.innerHTML = categories.map(c => `<option value="${c.val}">${lang === 'ja' ? c.ja : c.en}</option>`).join('');
+      filterCategory.value = currentVal || 'all';
+    }
+    
+    if (filterStorage) {
+      const currentVal = filterStorage.value;
+      const storages = [
+        { val: 'all', ja: 'すべての保存', en: 'All Storage' },
+        { val: 'fridge', ja: '冷蔵のみ', en: 'Fridge Only' },
+        { val: 'freezer', ja: '冷凍のみ', en: 'Freezer Only' },
+        { val: 'room', ja: '常温のみ', en: 'Room Temp Only' }
+      ];
+      filterStorage.innerHTML = storages.map(s => `<option value="${s.val}">${lang === 'ja' ? s.ja : s.en}</option>`).join('');
+      filterStorage.value = currentVal || 'all';
+    }
+    
+    if (filterSort) {
+      const currentVal = filterSort.value;
+      const sorts = [
+        { val: 'expiry-asc', ja: '期限が近い順', en: 'Expiry (Soonest)' },
+        { val: 'expiry-desc', ja: '期限が遠い順', en: 'Expiry (Furthest)' },
+        { val: 'qty-desc', ja: '残量が多い順', en: 'Qty (Highest)' },
+        { val: 'qty-asc', ja: '残量が少ない順', en: 'Qty (Lowest)' },
+        { val: 'added-desc', ja: '購入日が新しい順', en: 'Purchase Date (Newest)' }
+      ];
+      filterSort.innerHTML = sorts.map(s => `<option value="${s.val}">${lang === 'ja' ? s.ja : s.en}</option>`).join('');
+      filterSort.value = currentVal || 'expiry-asc';
+    }
+    
+    if (seasoningSortSelect) {
+      const currentVal = seasoningSortSelect.value;
+      const seasoningSorts = [
+        { val: 'default', ja: '標準（登録順）', en: 'Default (Added Order)' },
+        { val: 'frequency', ja: '使用頻度順（タップ数）', en: 'Frequency (Taps)' },
+        { val: 'low-level', ja: '残量が少ない順', en: 'Level (Lowest)' }
+      ];
+      seasoningSortSelect.innerHTML = seasoningSorts.map(s => `<option value="${s.val}">${lang === 'ja' ? s.ja : s.en}</option>`).join('');
+      seasoningSortSelect.value = currentVal || 'default';
+    }
+    
+    const shoppingCategories = [
+      { val: 'vegetable', ja: '野菜・果物', en: 'Vegetables/Fruits' },
+      { val: 'meat', ja: 'お肉・お魚', en: 'Meat/Fish' },
+      { val: 'dairy', ja: '卵・乳製品', en: 'Dairy/Eggs' },
+      { val: 'staple', ja: '主食・麺類', en: 'Staples/Noodles' },
+      { val: 'processed', ja: '加工・冷凍', en: 'Processed/Frozen' },
+      { val: 'retort', ja: '常温・缶詰', en: 'Pantry/Canned' },
+      { val: 'drink', ja: '飲料・お酒', en: 'Beverages/Alcohol' },
+      { val: 'paper', ja: '生活消耗品', en: 'Household Supplies' },
+      { val: 'cleaning', ja: '洗剤・お掃除', en: 'Detergents/Cleaning' },
+      { val: 'bath', ja: 'ヘア・ボディ', en: 'Hair/Body Care' },
+      { val: 'medicine', ja: '衛生・健康', en: 'Hygiene/Health' },
+      { val: 'other', ja: 'その他・雑貨', en: 'Others/Misc' }
+    ];
+    if (shoppingCategorySelect) {
+      const currentVal = shoppingCategorySelect.value;
+      shoppingCategorySelect.innerHTML = shoppingCategories.map(c => `<option value="${c.val}">${lang === 'ja' ? c.ja : c.en}</option>`).join('');
+      shoppingCategorySelect.value = currentVal || 'other';
+      updateShoppingCategorySelectColor();
+    }
+    if (editShoppingCategory) {
+      const currentVal = editShoppingCategory.value;
+      editShoppingCategory.innerHTML = shoppingCategories.map(c => `<option value="${c.val}">${lang === 'ja' ? c.ja : c.en}</option>`).join('');
+      editShoppingCategory.value = currentVal || 'other';
+      updateEditShoppingCategorySelectColor();
+    }
+    
+    if (editSeasoningLevel) {
+      const currentVal = editSeasoningLevel.value;
+      const levels = [
+        { val: 'full', ja: '100% (いっぱい)', en: '100% (Full)' },
+        { val: 'high', ja: '80%', en: '80%' },
+        { val: 'medium', ja: '60%', en: '60%' },
+        { val: 'low', ja: '40%', en: '40%' },
+        { val: 'very-low', ja: '20%', en: '20%' },
+        { val: 'empty', ja: '0% (空)', en: '0% (Empty)' }
+      ];
+      editSeasoningLevel.innerHTML = levels.map(l => `<option value="${l.val}">${lang === 'ja' ? l.ja : l.en}</option>`).join('');
+      editSeasoningLevel.value = currentVal || 'full';
+    }
+    
+    if (settingQtyStep) {
+      const currentVal = settingQtyStep.value;
+      const steps = [
+        { val: '10', ja: '10% ずつ減少 (100➔90➔80...➔0%)', en: 'Decrease by 10% (100➔90➔80...➔0%)' },
+        { val: '20', ja: '20% ずつ減少 (100➔80➔60➔40➔20➔0%)', en: 'Decrease by 20% (100➔80➔60➔40➔20➔0%)' },
+        { val: '25', ja: '25% ずつ減少 (100➔75➔50➔25➔0%)', en: 'Decrease by 25% (100➔75➔50➔25➔0%)' },
+        { val: '50', ja: '50% ずつ減少 (100➔50➔0%)', en: 'Decrease by 50% (100➔50➔0%)' }
+      ];
+      settingQtyStep.innerHTML = steps.map(s => `<option value="${s.val}">${lang === 'ja' ? s.ja : s.en}</option>`).join('');
+      settingQtyStep.value = currentVal || '25';
+    }
+
+    updateUnitSelects();
+  }
+
+  function updateUnitSelects() {
+    const lang = state.language || 'ja';
+    const units = [
+      { val: '個', ja: '個 (pcs)', en: 'pcs' },
+      { val: 'パック', ja: 'パック (pack)', en: 'pack' },
+      { val: '袋', ja: '袋 (bag)', en: 'bag' },
+      { val: '本', ja: '本 (bottle/pc)', en: 'bottle/pc' },
+      { val: 'g', ja: 'g (グラム)', en: 'g' },
+      { val: 'ml', ja: 'ml (ミリリットル)', en: 'ml' },
+      { val: '枚', ja: '枚 (sheets)', en: 'sheet' },
+      { val: '缶', ja: '缶 (can)', en: 'can' },
+      { val: 'L', ja: 'L (リットル)', en: 'L' },
+      { val: 'kg', ja: 'kg (キログラム)', en: 'kg' }
+    ];
+
+    const dropdowns = [shoppingUnitSelect, editShoppingUnit];
+    dropdowns.forEach(sel => {
+      if (!sel) return;
+      const currentVal = sel.value;
+      sel.innerHTML = units.map(u => `<option value="${u.val}">${lang === 'ja' ? u.ja : u.en}</option>`).join('');
+      sel.value = currentVal || '個';
+    });
+  }
+
+  function updatePlaceholders() {
+    const lang = state.language || 'ja';
+    const placeholders = {
+      ja: {
+        search: 'ストックを検索...',
+        seasoningName: '調味料名を入力...',
+        shoppingInput: '買うものを入力...',
+        foodName: 'キャベツ、洗濯洗剤 など...',
+        editSeasoningName: 'マヨネーズ など...',
+        editShoppingName: '買うものを入力...'
+      },
+      en: {
+        search: 'Search stock...',
+        seasoningName: 'Enter seasoning name...',
+        shoppingInput: 'Enter item to buy...',
+        foodName: 'e.g. Cabbage, Laundry soap...',
+        editSeasoningName: 'e.g. Mayonnaise...',
+        editShoppingName: 'Enter item to buy...'
+      }
+    };
+    
+    const p = placeholders[lang];
+    if (searchInput) searchInput.placeholder = p.search;
+    if (seasoningNameInput) seasoningNameInput.placeholder = p.seasoningName;
+    if (shoppingInput) shoppingInput.placeholder = p.shoppingInput;
+    if (inputFoodName) inputFoodName.placeholder = p.foodName;
+    if (editSeasoningName) editSeasoningName.placeholder = p.editSeasoningName;
+    if (editShoppingName) editShoppingName.placeholder = p.editShoppingName;
+  }
+
+  function setLanguage(lang) {
+    state.language = lang;
+    localStorage.setItem('fm_language', lang);
+    
+    // Toggle body data attribute
+    body.setAttribute('data-lang', lang);
+    
+    // Update select dropdown options
+    updateLocalizedSelects();
+    
+    // Update placeholders
+    updatePlaceholders();
+    
+    // Re-render all elements to apply language changes
+    renderFoods();
+    renderSeasonings();
+    renderShoppingList();
+    renderHistory();
+    
+    showToast(lang === 'ja' ? '言語を切り替えました' : 'Language changed');
+  }
+
   // --- INITIALIZATION ---
   function init() {
+    // 0. Load language
+    state.language = localStorage.getItem('fm_language') || 'ja';
+    body.setAttribute('data-lang', state.language);
+    if (settingLanguage) {
+      settingLanguage.value = state.language;
+    }
+    updateLocalizedSelects();
+    updatePlaceholders();
+
     // 1. Load theme
     state.theme = localStorage.getItem('fm_theme') || 'organic';
     applyTheme(state.theme);
@@ -228,6 +447,13 @@ document.addEventListener('DOMContentLoaded', () => {
         state.seasonings = window.DEFAULT_SEASONINGS ? [...window.DEFAULT_SEASONINGS] : [];
       }
       let seasoningsMigrated = false;
+
+      // Auto-populate if empty
+      if (state.seasonings.length === 0) {
+        state.seasonings = window.DEFAULT_SEASONINGS ? window.DEFAULT_SEASONINGS.map(s => ({ ...s, stock: 0 })) : [];
+        seasoningsMigrated = true;
+      }
+
       state.seasonings.forEach(s => {
         if (s.clicks === undefined) {
           s.clicks = 0;
@@ -240,6 +466,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (s.stock === undefined) {
           s.stock = 0;
+          seasoningsMigrated = true;
+        }
+        if (s.recommendIgnored) {
+          s.recommendIgnored = false; // reset recommendation ignore flag on reload
           seasoningsMigrated = true;
         }
       });
@@ -335,11 +565,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const currentValue = selectFoodUnit.value || '個';
     
+    const lang = state.language || 'ja';
     selectFoodUnit.innerHTML = '';
     sortedUnits.forEach(u => {
       const opt = document.createElement('option');
       opt.value = u;
-      opt.textContent = u === 'g' ? 'g (グラム)' : u === 'ml' ? 'ml (ミリリットル)' : u === 'L' ? 'L (リットル)' : u;
+      if (lang === 'ja') {
+        opt.textContent = u === 'g' ? 'g (グラム)' : u === 'ml' ? 'ml (ミリリットル)' : u === 'L' ? 'L (リットル)' : u;
+      } else {
+        opt.textContent = u === 'g' ? 'g (grams)' : u === 'ml' ? 'ml (milliliters)' : u === 'L' ? 'L (liters)' : u;
+      }
       selectFoodUnit.appendChild(opt);
     });
     
@@ -404,17 +639,27 @@ document.addEventListener('DOMContentLoaded', () => {
       statsBarConsume.style.width = `${consumeRateVal}%`;
       statsBarDiscard.style.width = `${discardRateVal}%`;
       
-      if (discardRateVal <= 10) {
-        statsComment.textContent = 'エコ度: 超エコ！すばらしい状態です！ 🌟';
-      } else if (discardRateVal <= 30) {
-        statsComment.textContent = 'エコ度: 普通です。廃棄をさらに減らせます！ 👍';
+      if (state.language === 'ja') {
+        if (discardRateVal <= 10) {
+          statsComment.textContent = 'エコ度: 超エコ！すばらしい状態です！ 🌟';
+        } else if (discardRateVal <= 30) {
+          statsComment.textContent = 'エコ度: 普通です。廃棄をさらに減らせます！ 👍';
+        } else {
+          statsComment.textContent = 'エコ度: 要注意！計画的な消費・利用を。 ⚠️';
+        }
       } else {
-        statsComment.textContent = 'エコ度: 要注意！計画的な消費・利用を。 ⚠️';
+        if (discardRateVal <= 10) {
+          statsComment.textContent = 'Eco Level: Excellent! Extremely eco-friendly! 🌟';
+        } else if (discardRateVal <= 30) {
+          statsComment.textContent = 'Eco Level: Moderate. Try to reduce waste further! 👍';
+        } else {
+          statsComment.textContent = 'Eco Level: Warning! Plan your meals carefully. ⚠️';
+        }
       }
     } else {
       statsBarConsume.style.width = '100%';
       statsBarDiscard.style.width = '0%';
-      statsComment.textContent = 'エコ度: 期間内の履歴ログがありません';
+      statsComment.textContent = state.language === 'ja' ? 'エコ度: 期間内の履歴ログがありません' : 'Eco Level: No history logs for this period';
     }
 
     // Render waste category analysis chart
@@ -471,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="flex: 1; height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; display: flex;">
               <div style="width: ${pct}%; height: 100%; background-color: var(--cat-color, #64748b); border-radius: 4px;"></div>
             </div>
-            <span style="width: 45px; text-align: right; font-weight: 800; color: var(--text-secondary);">${count}品 (${pct}%)</span>
+            <span style="width: 45px; text-align: right; font-weight: 800; color: var(--text-secondary);">${count}${state.language === 'ja' ? '品' : ' items'} (${pct}%)</span>
           `;
           
           statsWasteChart.appendChild(row);
@@ -539,21 +784,58 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getCategoryName(catKey) {
+    const lang = state.language || 'ja';
     const map = {
-      vegetable: '野菜・果物',
-      meat: 'お肉・お魚',
-      dairy: '卵・乳製品',
-      staple: '主食・麺類',
-      processed: '加工・冷凍',
-      retort: '常温・缶詰',
-      drink: '飲料・お酒',
-      paper: '生活消耗品',
-      cleaning: '洗剤・お掃除',
-      bath: 'ヘア・ボディ',
-      medicine: '衛生・健康',
-      other: 'その他・雑貨'
+      ja: {
+        vegetable: '野菜・果物',
+        meat: 'お肉・お魚',
+        dairy: '卵・乳製品',
+        staple: '主食・麺類',
+        processed: '加工・冷凍',
+        retort: '常温・缶詰',
+        drink: '飲料・お酒',
+        paper: '生活消耗品',
+        cleaning: '洗剤・お掃除',
+        bath: 'ヘア・ボディ',
+        medicine: '衛生・健康',
+        other: 'その他・雑貨'
+      },
+      en: {
+        vegetable: 'Vegetables/Fruits',
+        meat: 'Meat & Fish',
+        dairy: 'Dairy & Eggs',
+        staple: 'Staples/Noodles',
+        processed: 'Processed/Frozen',
+        retort: 'Pantry & Canned',
+        drink: 'Beverages/Alcohol',
+        paper: 'Household Supplies',
+        cleaning: 'Detergents/Cleaning',
+        bath: 'Hair/Body Care',
+        medicine: 'Hygiene & Health',
+        other: 'Others & Misc'
+      }
     };
-    return map[catKey] || 'その他・雑貨';
+    const langMap = map[lang] || map.ja;
+    return langMap[catKey] || (lang === 'ja' ? 'その他・雑貨' : 'Others & Misc');
+  }
+
+  function getUnitDisplayName(unit, lang) {
+    if (lang === 'ja') return unit;
+    const map = {
+      '個': 'pcs',
+      'パック': 'pack',
+      '袋': 'bag',
+      '本': 'bottle/pc',
+      '枚': 'sheet',
+      '缶': 'can',
+      '束': 'bunch',
+      '食': 'serv',
+      '切れ': 'slice',
+      '房': 'bunch',
+      '株': 'head',
+      '尾': 'pc'
+    };
+    return map[unit] || unit;
   }
 
   // Bind icons matching category keys
@@ -701,12 +983,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (expiredCount > 0 || warningCount > 0) {
       alertSummary.classList.remove('hidden');
       let alertMsg = '';
-      if (expiredCount > 0 && warningCount > 0) {
-        alertMsg = `期限切れ ${expiredCount}件、もうすぐ期限切れ ${warningCount}件あります！`;
-      } else if (expiredCount > 0) {
-        alertMsg = `期限切れの食材が ${expiredCount}件あります！`;
+      if (state.language === 'ja') {
+        if (expiredCount > 0 && warningCount > 0) {
+          alertMsg = `期限切れ ${expiredCount}件、もうすぐ期限切れ ${warningCount}件あります！`;
+        } else if (expiredCount > 0) {
+          alertMsg = `期限切れの食材が ${expiredCount}件あります！`;
+        } else {
+          alertMsg = `もうすぐ期限切れの食材が ${warningCount}件あります。`;
+        }
       } else {
-        alertMsg = `もうすぐ期限切れの食材が ${warningCount}件あります。`;
+        if (expiredCount > 0 && warningCount > 0) {
+          alertMsg = `${expiredCount} expired & ${warningCount} expiring soon!`;
+        } else if (expiredCount > 0) {
+          alertMsg = `${expiredCount} expired items found!`;
+        } else {
+          alertMsg = `${warningCount} items expiring soon.`;
+        }
       }
       alertText.textContent = alertMsg;
     } else {
@@ -717,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', () => {
       foodsGrid.innerHTML = `
         <div class="empty-state">
           <i data-lucide="package-open" style="width: 32px; height: 32px; opacity: 0.3; margin-bottom: 8px;"></i>
-          <p>食材が見つかりません</p>
+          <p>${state.language === 'ja' ? '食材が見つかりません' : 'No items found'}</p>
         </div>
       `;
       createIconsSafe();
@@ -730,29 +1022,31 @@ document.addEventListener('DOMContentLoaded', () => {
       
       let badgeHtml = '';
       if (food.remainingDays === null) {
-        badgeHtml = `<span class="days-badge none">期限なし</span>`;
+        badgeHtml = `<span class="days-badge none">${state.language === 'ja' ? '期限なし' : 'No expiry'}</span>`;
       } else if (food.remainingDays < 0) {
-        badgeHtml = `<span class="days-badge expired">期限切れ ${Math.abs(food.remainingDays)}日</span>`;
+        const days = Math.abs(food.remainingDays);
+        badgeHtml = `<span class="days-badge expired">${state.language === 'ja' ? `期限切れ ${days}日` : `Expired ${days}d`}</span>`;
       } else if (food.remainingDays === 0) {
-        badgeHtml = `<span class="days-badge warning">本日期限</span>`;
+        badgeHtml = `<span class="days-badge warning">${state.language === 'ja' ? '本日期限' : 'Expires Today'}</span>`;
       } else {
         const badgeType = food.remainingDays <= 3 ? 'warning' : 'safe';
-        badgeHtml = `<span class="days-badge ${badgeType}">あと ${food.remainingDays}日</span>`;
+        badgeHtml = `<span class="days-badge ${badgeType}">${state.language === 'ja' ? `あと ${food.remainingDays}日` : `${food.remainingDays}d left`}</span>`;
       }
 
       // Storage Badge
       let storageBadgeHtml = '';
       if (food.storageType === 'freezer') {
-        storageBadgeHtml = `<span class="storage-badge freezer"><i data-lucide="snowflake"></i>冷凍</span>`;
+        storageBadgeHtml = `<span class="storage-badge freezer"><i data-lucide="snowflake"></i>${state.language === 'ja' ? '冷凍' : 'Freezer'}</span>`;
       } else if (food.storageType === 'room') {
-        storageBadgeHtml = `<span class="storage-badge room"><i data-lucide="box"></i>常温</span>`;
+        storageBadgeHtml = `<span class="storage-badge room"><i data-lucide="box"></i>${state.language === 'ja' ? '常温' : 'Pantry'}</span>`;
       } else {
-        storageBadgeHtml = `<span class="storage-badge fridge"><i data-lucide="thermometer"></i>冷蔵</span>`;
+        storageBadgeHtml = `<span class="storage-badge fridge"><i data-lucide="thermometer"></i>${state.language === 'ja' ? '冷蔵' : 'Fridge'}</span>`;
       }
 
       const currentQty = Math.round(food.initialAmount * (food.quantity / 100) * 10) / 10;
-      const quantityText = `${currentQty}${food.unit} (${food.quantity}%)`;
-      const expiryFormatted = food.expiryDate ? food.expiryDate.replace(/-/g, '/') : 'なし';
+      const quantityText = `${currentQty}${getUnitDisplayName(food.unit, state.language)} (${food.quantity}%)`;
+      const noExpiryLabel = state.language === 'ja' ? 'なし' : 'None';
+      const expiryFormatted = food.expiryDate ? food.expiryDate.replace(/-/g, '/') : noExpiryLabel;
 
       card.innerHTML = `
         <div class="food-card-left">
@@ -763,7 +1057,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="food-name-txt">${escapeHtml(food.name)}</span>
             <span class="food-dates-txt">
               ${storageBadgeHtml}
-              <span>期限: ${expiryFormatted}</span>
+              <span>${state.language === 'ja' ? '期限' : 'Exp'}: ${expiryFormatted}</span>
             </span>
           </div>
         </div>
@@ -1004,7 +1298,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <i data-lucide="flask-conical"></i>
           </div>
           <div class="food-info" style="display: flex; flex-direction: column; min-width: 0;">
-            <span class="food-name-txt" style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(seasoning.name)}</span>
+            <span class="food-name-txt" style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(getSeasoningDisplayName(seasoning, state.language))}</span>
           </div>
         </div>
         <div class="food-card-right" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
@@ -1125,7 +1419,7 @@ document.addEventListener('DOMContentLoaded', () => {
       shoppingListContainer.innerHTML = `
         <div class="empty-state" style="padding: 20px 0;">
           <i data-lucide="shopping-bag" style="width: 32px; height: 32px; opacity: 0.3; margin-bottom: 6px;"></i>
-          <p>買い物リストは空です</p>
+          <p>${state.language === 'ja' ? '買い物リストは空です' : 'Shopping list is empty'}</p>
         </div>
       `;
       createIconsSafe();
@@ -1179,7 +1473,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <i data-lucide="circle"></i>
             </button>
             <span class="shopping-item-name">${escapeHtml(item.name)}</span>
-            <span class="shopping-item-qty">${item.initialAmount}${item.unit}</span>
+            <span class="shopping-item-qty">${item.initialAmount}${getUnitDisplayName(item.unit, state.language)}</span>
           </div>
           <div class="shopping-item-right">
             <button class="btn-delete btn-delete-shopping" data-id="${item.id}" aria-label="リストから削除">
@@ -1350,10 +1644,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const chip = document.createElement('div');
       chip.className = 'btn-chip';
       chip.style.setProperty('--seasoning-color', s.color || '#a8a29e');
+      const displayName = getSeasoningDisplayName(s, state.language);
       chip.innerHTML = `
         <span class="chip-main-action" style="display: flex; align-items: center; gap: 3px; cursor: pointer;">
           <i data-lucide="plus"></i>
-          <span>${s.name} を買う</span>
+          <span>${state.language === 'ja' ? `${displayName} を買う` : `Buy ${displayName}`}</span>
         </span>
         <button type="button" class="btn-chip-ignore" data-id="${s.id}" title="非表示にする" aria-label="提案を非表示">
           <i data-lucide="x"></i>
@@ -1403,7 +1698,7 @@ document.addEventListener('DOMContentLoaded', () => {
       historyListContainer.innerHTML = `
         <div class="empty-state">
           <i data-lucide="history" style="width: 32px; height: 32px; opacity: 0.3; margin-bottom: 6px;"></i>
-          <p>処理履歴がありません</p>
+          <p>${state.language === 'ja' ? '処理履歴がありません' : 'No history log found'}</p>
         </div>
       `;
       createIconsSafe();
@@ -1420,7 +1715,12 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = `history-card cat-color-${item.category}`;
       
       const badgeClass = item.action === 'consume' ? 'action-consume' : 'action-discard';
-      const badgeText = item.action === 'consume' ? '消費' : '廃棄';
+      let badgeText = '';
+      if (state.language === 'ja') {
+        badgeText = item.action === 'consume' ? '消費' : '廃棄';
+      } else {
+        badgeText = item.action === 'consume' ? 'Used' : 'Wasted';
+      }
       
       const date = new Date(item.timestamp);
       const timeStr = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
@@ -1431,15 +1731,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <i data-lucide="${getCategoryIcon(item.category)}" style="width:10px; height:10px;"></i>
           </div>
           <div class="history-card-info">
-            <span class="history-food-name">${escapeHtml(item.name)} <span style="font-size:0.65rem; font-weight:400; color:var(--text-secondary);">(${item.amount}${item.unit})</span></span>
+            <span class="history-food-name">${escapeHtml(item.name)} <span style="font-size:0.65rem; font-weight:400; color:var(--text-secondary);">(${item.amount}${getUnitDisplayName(item.unit, state.language)})</span></span>
             <span class="history-time-txt">${timeStr}</span>
           </div>
         </div>
         <div class="history-card-right">
           <span class="history-badge ${badgeClass}">${badgeText}</span>
-          <button class="btn-restore" data-id="${item.id}" title="ストックに戻す" aria-label="元に戻す">
+          <button class="btn-restore" data-id="${item.id}" title="${state.language === 'ja' ? 'ストックに戻す' : 'Restore to stock'}" aria-label="元に戻す">
             <i data-lucide="undo-2"></i>
-            <span>戻す</span>
+            <span>${state.language === 'ja' ? '戻す' : 'Restore'}</span>
           </button>
         </div>
       `;
@@ -1846,43 +2146,57 @@ document.addEventListener('DOMContentLoaded', () => {
     // Swipe gesture detection to switch tabs
     let touchStartX = 0;
     let touchStartY = 0;
+    let touchStartTime = 0;
     
-    const mainContent = document.querySelector('.app-content');
-    if (mainContent) {
-      mainContent.addEventListener('touchstart', (e) => {
-        const activeModal = document.querySelector('.modal.active');
-        if (activeModal) return;
+    document.addEventListener('touchstart', (e) => {
+      const activeModal = document.querySelector('.modal.active');
+      if (activeModal) return;
 
-        touchStartX = e.changedTouches[0].clientX;
-        touchStartY = e.changedTouches[0].clientY;
-      }, { passive: true });
+      // Ignore swipes starting on interactive elements, scrollable chips, or stock controls
+      if (e.target.closest('input, select, textarea, button, a, #recommendation-chips, .recommendation-chips, .seasoning-stock-control')) {
+        touchStartX = 0;
+        touchStartY = 0;
+        return;
+      }
 
-      mainContent.addEventListener('touchend', (e) => {
-        const activeModal = document.querySelector('.modal.active');
-        if (activeModal) return;
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
+      touchStartTime = Date.now();
+    }, { passive: true });
 
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
+    document.addEventListener('touchend', (e) => {
+      const activeModal = document.querySelector('.modal.active');
+      if (activeModal) return;
+      if (!touchStartX || !touchStartY) return;
 
-        const diffX = touchEndX - touchStartX;
-        const diffY = touchEndY - touchStartY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const touchEndTime = Date.now();
 
-        if (Math.abs(diffX) > 60 && Math.abs(diffY) < 40) {
-          const currentIndex = getActiveTabIndex();
-          if (currentIndex === -1) return;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      const diffTime = touchEndTime - touchStartTime;
 
-          if (diffX < 0) {
-            if (currentIndex < 3) {
-              switchTab(currentIndex + 1);
-            }
-          } else {
-            if (currentIndex > 0) {
-              switchTab(currentIndex - 1);
-            }
+      // Reset coordinates
+      touchStartX = 0;
+      touchStartY = 0;
+
+      // Horizontal movement >= 40px, within 500ms, and horizontal swipe ratio >= 1.2 * vertical
+      if (diffTime < 500 && Math.abs(diffX) >= 40 && Math.abs(diffX) > Math.abs(diffY) * 1.2) {
+        const currentIndex = getActiveTabIndex();
+        if (currentIndex === -1) return;
+
+        if (diffX < 0) {
+          if (currentIndex < 3) {
+            switchTab(currentIndex + 1);
+          }
+        } else {
+          if (currentIndex > 0) {
+            switchTab(currentIndex - 1);
           }
         }
-      }, { passive: true });
-    }
+      }
+    }, { passive: true });
 
     // Time axis tabs click in History analytics card
     document.querySelectorAll('.btn-stats-time').forEach(btn => {
@@ -2424,7 +2738,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (settingQtyStep) {
       settingQtyStep.addEventListener('change', (e) => {
         saveQtyStep(e.target.value);
-        showToast('減少ステップを変更しました');
+        showToast(state.language === 'ja' ? '減少ステップを変更しました' : 'Changed decrement step');
+      });
+    }
+
+    if (settingLanguage) {
+      settingLanguage.addEventListener('change', (e) => {
+        setLanguage(e.target.value);
       });
     }
 
